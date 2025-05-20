@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int                 @id @default(autoincrement())
+  email            String?             @unique
+  name             String?
+  password         String? // nullable for OAuth users
+  provider         AuthProvider?
+  providerId       String? // OAuth provider user id
+  bio              String? // User bio
+  avatar           String? // Profile picture URL
+  isVerified       Boolean             @default(false)
+  resetToken       String? // For password reset
+  resetTokenExpiry DateTime?
+  debatesAsDebater DebateParticipant[]
+  votes            Vote[]
+  comments         Comment[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+}
+
+model Debate {
+  id           Int                 @id @default(autoincrement())
+  topic        String
+  description  String? // Detailed description of the debate
+  status       DebateStatus        @default(WAITING)
+  category     Category?           @relation(fields: [categoryId], references: [id])
+  categoryId   Int?
+  participants DebateParticipant[]
+  comments     Comment[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+model DebateParticipant {
+  id       Int             @id @default(autoincrement())
+  user     User            @relation(fields: [userId], references: [id])
+  userId   Int
+  debate   Debate          @relation(fields: [debateId], references: [id])
+  debateId Int
+  role     ParticipantRole
+  position String? // User's position/argument in the debate
+  votes    Vote[] // votes received by this participant (if debater)
+  joinedAt DateTime        @default(now())
+
+  @@unique([userId, debateId])
+}
+
+model Vote {
+  id            Int               @id @default(autoincrement())
+  voter         User              @relation(fields: [voterId], references: [id])
+  voterId       Int
+  participant   DebateParticipant @relation(fields: [participantId], references: [id])
+  participantId Int
+  value         Int // 1 for upvote, -1 for downvote
+  createdAt     DateTime          @default(now())
+
+  @@unique([voterId, participantId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  debate    Debate   @relation(fields: [debateId], references: [id])
+  debateId  Int
+  parentId  Int? // For nested comments
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  debates     Debate[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ParticipantRole {
+  DEBATER
+  AUDIENCE
+}
+
+enum DebateStatus {
+  WAITING
+  ONGOING
+  FINISHED
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  GITHUB
+}
