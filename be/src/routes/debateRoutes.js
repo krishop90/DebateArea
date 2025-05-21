@@ -1,27 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const { 
+const { authenticate } = require('../middleware/auth');
+const {
   createDebate,
   getDebates,
   getDebate,
   joinDebate,
-  voteOnParticipant,
-  updateDebateStatus,
+  voteOnDebater,
+  sendMessage,
   getMyDebates,
-  getDebateStats
+  endDebate,
+  getUserDebateStats,
+  startDebateTimer,
+  analyzeDebateResults,
+  requestResults
 } = require('../controllers/debateController');
-const { authenticate } = require('../middleware/auth');
 
 // Public routes
 router.get('/', getDebates);
 router.get('/:id', getDebate);
 
 // Protected routes
-router.post('/', authenticate, createDebate);
-router.post('/:id/join', authenticate, joinDebate);
-router.post('/:id/vote', authenticate, voteOnParticipant);
-router.put('/:id/status', authenticate, updateDebateStatus);
-router.get('/my/:type', authenticate, getMyDebates);
-router.get('/:id/stats', authenticate, getDebateStats);
+router.use(authenticate);
+router.post('/', createDebate);
+router.post('/:id/join', joinDebate);
+router.post('/:id/vote', voteOnDebater);
+router.post('/:id/messages', sendMessage);
+router.post('/:id/end', endDebate);
+router.post('/:id/start', startDebateTimer);
+router.post('/:id/request-results', requestResults);
+router.get('/my-debates', getMyDebates);
+router.get('/user/stats', getUserDebateStats);
 
 module.exports = router;

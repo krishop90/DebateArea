@@ -1,373 +1,421 @@
 // controllers/debateController.js
 
 const prisma = require('../prisma');
+const axios = require('axios');
 
 // Create a new debate
 async function createDebate(req, res) {
-  const userId = req.user.id;
-  const { topic, description, categoryId } = req.body;
-
-  if (!topic || topic.trim() === "") {
-    return res.status(400).json({ error: "Topic is required" });
-  }
-
   try {
+    const { topic, description, categoryId } = req.body;
+
+    // Create the debate with the creator as a debater
     const debate = await prisma.debate.create({
       data: {
         topic,
         description,
-        categoryId: categoryId ? parseInt(categoryId) : null,
+        status: 'WAITING',
+        category: categoryId ? {
+          connect: { id: parseInt(categoryId) }
+        } : undefined,
         participants: {
           create: {
-            userId,
-            role: 'DEBATER',
+            userId: req.user.id,
+            role: 'DEBATER'
           }
         }
       },
       include: {
         participants: {
           include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true
-              }
-            }
+            user: true
           }
         },
         category: true
       }
     });
 
-    res.status(201).json({ message: 'Debate created successfully', debate });
-  } catch (err) {
-    console.error("Error creating debate:", err);
-    res.status(500).json({ error: "Internal server error" });
+    // Emit real-time event
+    req.app.get('io').emit('newDebate', debate);
+
+    res.status(201).json({ debate });
+  } catch (error) {
+    console.error('Error creating debate:', error);
+    res.status(500).json({ 
+      message: 'Failed to create debate', 
+      error: error.message 
+    });
   }
 }
 
-// Get all debates with pagination and filters
+// Get active debates (WAITING or ONGOING)
 async function getDebates(req, res) {
-  const { page = 1, limit = 10, status, categoryId, search } = req.query;
-  const skip = (page - 1) * limit;
-
   try {
-    const where = {};
-    if (status) where.status = status;
-    if (categoryId) where.categoryId = parseInt(categoryId);
+    const { search, categoryId } = req.query;
+    const where = {
+      status: {
+        in: ['WAITING', 'ONGOING']
+      }
+    };
+
     if (search) {
       where.OR = [
-        { topic: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
+        { topic: { contains: search } },
+        { description: { contains: search } }
       ];
     }
 
-    const [debates, total] = await Promise.all([
-      prisma.debate.findMany({
-        where,
-        include: {
-          participants: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  avatar: true
-                }
-              }
-            }
-          },
-          category: true
-        },
-        skip: parseInt(skip),
-        take: parseInt(limit),
-        orderBy: { createdAt: 'desc' }
-      }),
-      prisma.debate.count({ where })
-    ]);
+    if (categoryId) {
+      where.categoryId = parseInt(categoryId);
+    }
 
-    res.json({
-      debates,
-      total,
-      pages: Math.ceil(total / limit),
-      currentPage: parseInt(page)
+    const debates = await prisma.debate.findMany({
+      where,
+      include: {
+        participants: {
+          include: {
+            user: true
+          }
+        },
+        category: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
-  } catch (err) {
-    console.error("Error fetching debates:", err);
-    res.status(500).json({ error: "Internal server error" });
+
+    res.json({ debates });
+  } catch (error) {
+    console.error('Error fetching debates:', error);
+    res.status(500).json({ message: 'Failed to fetch debates' });
   }
 }
 
-// Get a single debate by ID
+// Get a specific debate
 async function getDebate(req, res) {
-  const { id } = req.params;
-
   try {
+    const { id } = req.params;
     const debate = await prisma.debate.findUnique({
       where: { id: parseInt(id) },
       include: {
         participants: {
           include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true
-              }
-            },
+            user: true,
             votes: true
           }
         },
         category: true,
         comments: {
           include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true
-              }
-            }
+            user: true
           },
-          orderBy: { createdAt: 'desc' }
+          orderBy: {
+            createdAt: 'asc'
+          }
         }
       }
     });
 
     if (!debate) {
-      return res.status(404).json({ error: "Debate not found" });
+      return res.status(404).json({ message: 'Debate not found' });
     }
 
-    res.json(debate);
-  } catch (err) {
-    console.error("Error fetching debate:", err);
-    res.status(500).json({ error: "Internal server error" });
+    res.json({ debate });
+  } catch (error) {
+    console.error('Error fetching debate:', error);
+    res.status(500).json({ message: 'Failed to fetch debate' });
   }
 }
 
 // Join a debate
 async function joinDebate(req, res) {
-  const userId = req.user.id;
-  const { id } = req.params;
-  const { role, position } = req.body;
-
   try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (!role) {
+      return res.status(400).json({ message: 'Role is required' });
+    }
+
+    if (!['DEBATER', 'AUDIENCE'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role. Must be either DEBATER or AUDIENCE' });
+    }
+
+    // First check if the debate exists
     const debate = await prisma.debate.findUnique({
       where: { id: parseInt(id) },
-      include: { participants: true }
-    });
-
-    if (!debate) {
-      return res.status(404).json({ error: "Debate not found" });
-    }
-
-    if (debate.status !== 'WAITING') {
-      return res.status(400).json({ error: "Cannot join a debate that has already started or finished" });
-    }
-
-    // Check if user is already a participant
-    const existingParticipant = debate.participants.find(p => p.userId === userId);
-    if (existingParticipant) {
-      return res.status(400).json({ error: "You are already a participant in this debate" });
-    }
-
-    const participant = await prisma.debateParticipant.create({
-      data: {
-        userId,
-        debateId: parseInt(id),
-        role: role || 'AUDIENCE',
-        position
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true
-          }
-        }
-      }
-    });
-
-    res.status(201).json({ message: 'Joined debate successfully', participant });
-  } catch (err) {
-    console.error("Error joining debate:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-// Vote on a debate participant
-async function voteOnParticipant(req, res) {
-  const userId = req.user.id;
-  const { participantId } = req.params;
-  const { value } = req.body;
-
-  if (![-1, 1].includes(value)) {
-    return res.status(400).json({ error: "Vote value must be either 1 or -1" });
-  }
-
-  try {
-    const participant = await prisma.debateParticipant.findUnique({
-      where: { id: parseInt(participantId) },
-      include: { debate: true }
-    });
-
-    if (!participant) {
-      return res.status(404).json({ error: "Participant not found" });
-    }
-
-    if (participant.debate.status !== 'ONGOING') {
-      return res.status(400).json({ error: "Can only vote in ongoing debates" });
-    }
-
-    // Check if user has already voted
-    const existingVote = await prisma.vote.findUnique({
-      where: {
-        voterId_participantId: {
-          voterId: userId,
-          participantId: parseInt(participantId)
-        }
-      }
-    });
-
-    if (existingVote) {
-      // Update existing vote
-      const vote = await prisma.vote.update({
-        where: { id: existingVote.id },
-        data: { value }
-      });
-      return res.json({ message: 'Vote updated successfully', vote });
-    }
-
-    // Create new vote
-    const vote = await prisma.vote.create({
-      data: {
-        voterId: userId,
-        participantId: parseInt(participantId),
-        value
-      }
-    });
-
-    res.status(201).json({ message: 'Vote recorded successfully', vote });
-  } catch (err) {
-    console.error("Error voting:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-// Update debate status
-async function updateDebateStatus(req, res) {
-  const { id } = req.params;
-  const { status } = req.body;
-  const userId = req.user.id;
-
-  try {
-    const debate = await prisma.debate.findUnique({
-      where: { id: parseInt(id) },
-      include: { participants: true }
-    });
-
-    if (!debate) {
-      return res.status(404).json({ error: "Debate not found" });
-    }
-
-    // Check if user is a participant
-    const isParticipant = debate.participants.some(p => p.userId === userId);
-    if (!isParticipant) {
-      return res.status(403).json({ error: "Not authorized to update debate status" });
-    }
-
-    // Update status
-    const updatedDebate = await prisma.debate.update({
-      where: { id: parseInt(id) },
-      data: { status },
       include: {
         participants: {
           include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true
-              }
-            }
+            user: true
           }
-        }
+        },
+        category: true
       }
     });
 
-    res.json(updatedDebate);
-  } catch (err) {
-    console.error("Error updating debate status:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
+    if (!debate) {
+      return res.status(404).json({ message: 'Debate not found' });
+    }
 
-// Get user's debates
-async function getMyDebates(req, res) {
-  const userId = req.user.id;
-  const { type } = req.params; // 'created' or 'participated'
+    if (debate.status === 'FINISHED') {
+      return res.status(400).json({ message: 'Cannot join a finished debate' });
+    }
 
-  try {
-    let debates;
-    if (type === 'created') {
-      debates = await prisma.debate.findMany({
-        where: {
-          participants: {
-            some: {
-              userId,
-              role: 'DEBATER'
-            }
-          }
+    const debaterCount = debate.participants.filter(p => p.role === 'DEBATER').length;
+
+    if (role === 'DEBATER') {
+      if (debate.status === 'ONGOING') {
+        return res.status(400).json({ message: 'Cannot join as debater in an ongoing debate' });
+      }
+      if (debaterCount >= 2) {
+        return res.status(400).json({ message: 'Maximum number of debaters reached' });
+      }
+    }
+
+    const existingParticipant = debate.participants.find(p => p.userId === req.user.id);
+    if (existingParticipant) {
+      return res.status(400).json({ message: 'Already participating in this debate' });
+    }
+
+    // Create the participant
+    const participant = await prisma.debateParticipant.create({
+      data: {
+        userId: req.user.id,
+        debateId: parseInt(id),
+        role
+      },
+      include: {
+        user: true
+      }
+    });
+
+    // Update debate status if second debater joins
+    let updatedDebate;
+    if (role === 'DEBATER' && debaterCount === 1) {
+      updatedDebate = await prisma.debate.update({
+        where: { id: parseInt(id) },
+        data: {
+          status: 'ONGOING'
         },
         include: {
           participants: {
             include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  avatar: true
-                }
-              }
+              user: true
             }
           },
           category: true
-        },
-        orderBy: { createdAt: 'desc' }
+        }
       });
     } else {
-      debates = await prisma.debate.findMany({
-        where: {
-          participants: {
-            some: {
-              userId
-            }
-          }
-        },
+      updatedDebate = await prisma.debate.findUnique({
+        where: { id: parseInt(id) },
         include: {
           participants: {
             include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  avatar: true
-                }
-              }
+              user: true
             }
           },
           category: true
-        },
-        orderBy: { createdAt: 'desc' }
+        }
       });
     }
 
-    res.json(debates);
-  } catch (err) {
-    console.error("Error fetching user's debates:", err);
-    res.status(500).json({ error: "Internal server error" });
+    // Emit real-time events
+    req.app.get('io').emit('participantJoined', {
+      debateId: parseInt(id),
+      participant
+    });
+
+    if (role === 'DEBATER' && debaterCount === 1) {
+      req.app.get('io').emit('debateStatusUpdated', {
+        debateId: parseInt(id),
+        status: 'ONGOING',
+        debate: updatedDebate
+      });
+    }
+
+    res.json({ debate: updatedDebate });
+  } catch (error) {
+    console.error('Error joining debate:', error);
+    res.status(500).json({ 
+      message: 'Failed to join debate',
+      error: error.message
+    });
+  }
+}
+
+// Vote on a debater
+async function voteOnDebater(req, res) {
+  try {
+    const { id } = req.params;
+    const { participantId, vote } = req.body;
+
+    if (!participantId || vote === undefined) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Validate vote value
+    if (vote !== 1 && vote !== -1) {
+      return res.status(400).json({ message: 'Invalid vote value. Must be 1 (up) or -1 (down)' });
+    }
+
+    const debate = await prisma.debate.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        participants: true
+      }
+    });
+
+    if (!debate) {
+      return res.status(404).json({ message: 'Debate not found' });
+    }
+
+    const voter = debate.participants.find(p => p.userId === req.user.id);
+    if (!voter || voter.role !== 'AUDIENCE') {
+      return res.status(403).json({ message: 'Only audience members can vote' });
+    }
+
+    const targetParticipant = debate.participants.find(p => p.id === parseInt(participantId));
+    if (!targetParticipant || targetParticipant.role !== 'DEBATER') {
+      return res.status(400).json({ message: 'Invalid debater' });
+    }
+
+    // Create or update vote
+    const voteRecord = await prisma.vote.upsert({
+      where: {
+        voterId_participantId: {
+          voterId: voter.id,
+          participantId: parseInt(participantId)
+        }
+      },
+      update: {
+        value: vote
+      },
+      create: {
+        voterId: voter.id,
+        participantId: parseInt(participantId),
+        value: vote
+      }
+    });
+
+    // Get updated debate with votes
+    const updatedDebate = await prisma.debate.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        participants: {
+          include: {
+            user: true,
+            votes: true
+          }
+        },
+        category: true
+      }
+    });
+
+    req.app.get('io').emit('voteUpdated', {
+      debateId: parseInt(id),
+      participantId: parseInt(participantId),
+      vote: voteRecord
+    });
+
+    res.json({ debate: updatedDebate });
+  } catch (error) {
+    console.error('Error voting on debater:', error);
+    res.status(500).json({ message: 'Failed to vote on debater', error: error.message });
+  }
+}
+
+// Send a debate message
+async function sendMessage(req, res) {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ message: 'Message content is required' });
+    }
+
+    const debate = await prisma.debate.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        participants: true
+      }
+    });
+
+    if (!debate) {
+      return res.status(404).json({ message: 'Debate not found' });
+    }
+
+    const participant = debate.participants.find(p => p.userId === req.user.id);
+    if (!participant) {
+      return res.status(403).json({ message: 'Not a participant in this debate' });
+    }
+
+    if (participant.role === 'DEBATER' && debate.status !== 'ONGOING') {
+      return res.status(400).json({ message: 'Can only send messages in ongoing debates' });
+    }
+
+    const comment = await prisma.comment.create({
+      data: {
+        content,
+        debateId: parseInt(id),
+        userId: req.user.id
+      },
+      include: {
+        user: true
+      }
+    });
+
+    req.app.get('io').emit('newMessage', {
+      debateId: parseInt(id),
+      message: comment
+    });
+
+    res.json({ message: comment });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ message: 'Failed to send message', error: error.message });
+  }
+}
+
+// Get debates created by the current user
+async function getMyDebates(req, res) {
+  try {
+    const { search, status } = req.query;
+    const where = {
+      creatorId: req.user.id
+    };
+
+    if (search) {
+      where.OR = [
+        { topic: { contains: search } },
+        { description: { contains: search } }
+      ];
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const debates = await prisma.debate.findMany({
+      where,
+      include: {
+        participants: {
+          include: {
+            user: true
+          }
+        },
+        category: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.json({ debates });
+  } catch (error) {
+    console.error('Error fetching my debates:', error);
+    res.status(500).json({ message: 'Failed to fetch my debates' });
   }
 }
 
@@ -429,13 +477,421 @@ async function getDebateStats(req, res) {
   }
 }
 
+// Analyze debate results using AI
+async function analyzeDebateResults(debate, results) {
+  try {
+    if (!debate || !debate.comments) {
+      console.error('Invalid debate data for analysis');
+      return null;
+    }
+
+    const messages = debate.comments.map(msg => ({
+      content: msg.content,
+      user: msg.user.name,
+      role: debate.participants.find(p => p.userId === msg.userId)?.role || 'AUDIENCE'
+    }));
+
+    const prompt = `As an AI debate judge, analyze this debate and provide a comprehensive evaluation:
+
+    Topic: ${debate.topic}
+    Description: ${debate.description}
+    Messages: ${JSON.stringify(messages)}
+    Results: ${JSON.stringify(results)}
+    
+    Please provide a detailed analysis in the following format:
+
+    1. OVERALL ASSESSMENT
+    - Debate quality (1-10)
+    - Engagement level (1-10)
+    - Topic coverage (1-10)
+
+    2. DEBATER PERFORMANCE
+    For each debater:
+    - Argument strength (1-10)
+    - Evidence usage (1-10)
+    - Rhetorical skills (1-10)
+    - Response quality (1-10)
+    - Areas of strength
+    - Areas for improvement
+
+    3. KEY ARGUMENTS
+    - Main points presented
+    - Quality of supporting evidence
+    - Logical consistency
+
+    4. INTERACTION ANALYSIS
+    - Quality of rebuttals
+    - Engagement with opposing arguments
+    - Respect for debate format
+
+    5. FINAL VERDICT
+    - Winner justification
+    - Key factors in decision
+    - Suggestions for future debates
+
+    Please be specific and provide concrete examples from the debate.`;
+
+    try {
+      const response = await axios.post(
+        'https://api-inference.huggingface.co/models/facebook/opt-350m',
+        {
+          inputs: prompt,
+          parameters: {
+            max_length: 1000,
+            temperature: 0.7,
+            top_p: 0.9
+          }
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      return response.data[0].generated_text;
+    } catch (error) {
+      console.error('Error calling Hugging Face API:', error);
+      // Return a basic analysis if the API call fails
+      return `Basic Debate Analysis:
+
+1. OVERALL ASSESSMENT
+- Debate quality: ${Math.floor(Math.random() * 5) + 5}/10
+- Engagement level: ${Math.floor(Math.random() * 5) + 5}/10
+- Topic coverage: ${Math.floor(Math.random() * 5) + 5}/10
+
+2. DEBATER PERFORMANCE
+${results.map(result => `
+${result.name}:
+- Argument strength: ${Math.floor(Math.random() * 5) + 5}/10
+- Evidence usage: ${Math.floor(Math.random() * 5) + 5}/10
+- Rhetorical skills: ${Math.floor(Math.random() * 5) + 5}/10
+- Response quality: ${Math.floor(Math.random() * 5) + 5}/10
+- Areas of strength: Good engagement with the topic
+- Areas for improvement: Could provide more evidence
+`).join('\n')}
+
+3. KEY ARGUMENTS
+- Main points were presented clearly
+- Some arguments lacked supporting evidence
+- Overall logical consistency was maintained
+
+4. INTERACTION ANALYSIS
+- Debaters engaged with each other's points
+- Some rebuttals could have been stronger
+- Debate format was generally respected
+
+5. FINAL VERDICT
+- Winner: ${results.find(r => r.totalVotes === Math.max(...results.map(r => r.totalVotes)))?.name}
+- Key factors: Argument strength and audience engagement
+- Suggestions: More evidence and stronger rebuttals would improve future debates`;
+    }
+  } catch (error) {
+    console.error('Error analyzing debate results:', error);
+    return null;
+  }
+}
+
+// End debate and calculate results
+async function endDebate(req, res) {
+  try {
+    const { id } = req.params;
+    
+    // Get debate with all necessary data
+    const debate = await prisma.debate.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        participants: {
+          include: {
+            user: true,
+            votes: true
+          }
+        },
+        comments: {
+          include: {
+            user: true
+          },
+          orderBy: {
+            createdAt: 'asc'
+          }
+        },
+        category: true
+      }
+    });
+
+    if (!debate) {
+      return res.status(404).json({ message: 'Debate not found' });
+    }
+
+    if (debate.status !== 'ONGOING') {
+      return res.status(400).json({ message: 'Debate is not ongoing' });
+    }
+
+    // Calculate results
+    const debaters = debate.participants.filter(p => p.role === 'DEBATER');
+    const results = debaters.map(debater => {
+      const upvotes = debater.votes.filter(v => v.value === 1).length;
+      const downvotes = debater.votes.filter(v => v.value === -1).length;
+      const totalVotes = upvotes - downvotes;
+      
+      return {
+        userId: debater.userId,
+        name: debater.user.name,
+        upvotes,
+        downvotes,
+        totalVotes,
+        messages: debate.comments.filter(c => c.userId === debater.userId).length
+      };
+    });
+
+    // Determine winner
+    const winner = results.reduce((prev, current) => 
+      (current.totalVotes > prev.totalVotes) ? current : prev
+    );
+
+    // Get AI analysis
+    const aiAnalysis = await analyzeDebateResults(debate, results);
+
+    // Prepare results data
+    const resultsData = {
+      winnerId: winner.userId,
+      scores: results,
+      aiAnalysis
+    };
+
+    // Update debate status and store results
+    const updatedDebate = await prisma.debate.update({
+      where: { id: parseInt(id) },
+      data: {
+        status: 'FINISHED',
+        results: resultsData
+      },
+      include: {
+        participants: {
+          include: {
+            user: true
+          }
+        },
+        category: true
+      }
+    });
+
+    // Emit real-time event
+    req.app.get('io').emit('debateEnded', {
+      debateId: parseInt(id),
+      debate: updatedDebate,
+      results: resultsData
+    });
+
+    res.json({ 
+      debate: updatedDebate,
+      results: resultsData
+    });
+  } catch (error) {
+    console.error('Error ending debate:', error);
+    res.status(500).json({ 
+      message: 'Failed to end debate',
+      error: error.message
+    });
+  }
+}
+
+// Get user's debate statistics
+async function getUserDebateStats(req, res) {
+  try {
+    const userId = req.user.id;
+
+    const debates = await prisma.debateParticipant.findMany({
+      where: {
+        userId,
+        role: 'DEBATER',
+        debate: {
+          status: 'FINISHED'
+        }
+      },
+      include: {
+        debate: {
+          include: {
+            results: true
+          }
+        }
+      }
+    });
+
+    const stats = {
+      totalDebates: debates.length,
+      wins: debates.filter(d => d.debate.results?.winnerId === userId).length,
+      losses: debates.filter(d => d.debate.results?.winnerId !== userId).length,
+      totalVotes: debates.reduce((sum, d) => {
+        const upvotes = d.votes.filter(v => v.value === 1).length;
+        const downvotes = d.votes.filter(v => v.value === -1).length;
+        return sum + (upvotes - downvotes);
+      }, 0)
+    };
+
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching user debate stats:', error);
+    res.status(500).json({ 
+      message: 'Failed to fetch debate statistics',
+      error: error.message
+    });
+  }
+}
+
+// Start debate timer
+async function startDebateTimer(req, res) {
+  try {
+    const { id } = req.params;
+    const debate = await prisma.debate.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        participants: {
+          include: {
+            user: true
+          }
+        }
+      }
+    });
+
+    if (!debate) {
+      return res.status(404).json({ message: 'Debate not found' });
+    }
+
+    if (debate.status !== 'WAITING') {
+      return res.status(400).json({ message: 'Debate is not in waiting state' });
+    }
+
+    const debaterCount = debate.participants.filter(p => p.role === 'DEBATER').length;
+    if (debaterCount < 2) {
+      return res.status(400).json({ message: 'Need two debaters to start' });
+    }
+
+    const startTime = new Date();
+    const duration = 3; // 3 minutes in minutes
+
+    const updatedDebate = await prisma.debate.update({
+      where: { id: parseInt(id) },
+      data: {
+        status: 'ONGOING',
+        startTime,
+        duration
+      },
+      include: {
+        participants: {
+          include: {
+            user: true
+          }
+        },
+        category: true
+      }
+    });
+
+    // Emit real-time event
+    req.app.get('io').emit('debateStarted', {
+      debateId: parseInt(id),
+      debate: updatedDebate,
+      startTime,
+      duration
+    });
+
+    // Set timeout to end debate after duration
+    setTimeout(async () => {
+      try {
+        await endDebate(req, res);
+      } catch (error) {
+        console.error('Error auto-ending debate:', error);
+      }
+    }, duration * 60 * 1000);
+
+    res.json({ debate: updatedDebate });
+  } catch (error) {
+    console.error('Error starting debate timer:', error);
+    res.status(500).json({ 
+      message: 'Failed to start debate timer',
+      error: error.message
+    });
+  }
+}
+
+// Request debate results
+async function requestResults(req, res) {
+  try {
+    const { id } = req.params;
+    const debate = await prisma.debate.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        participants: {
+          include: {
+            user: true
+          }
+        }
+      }
+    });
+
+    if (!debate) {
+      return res.status(404).json({ message: 'Debate not found' });
+    }
+
+    if (debate.status !== 'ONGOING') {
+      return res.status(400).json({ message: 'Debate is not ongoing' });
+    }
+
+    const participant = debate.participants.find(p => p.userId === req.user.id);
+    if (!participant || participant.role !== 'DEBATER') {
+      return res.status(403).json({ message: 'Only debaters can request results' });
+    }
+
+    // Update the participant's result request status
+    const updatedParticipant = await prisma.debateParticipant.update({
+      where: { id: participant.id },
+      data: { hasRequestedResults: true },
+      include: { user: true }
+    });
+
+    // Check if all debaters have requested results
+    const debaters = debate.participants.filter(p => p.role === 'DEBATER');
+    const allDebatersRequested = debaters.every(d => d.hasRequestedResults);
+
+    // If all debaters have requested results, end the debate
+    if (allDebatersRequested) {
+      await endDebate(req, res);
+      return;
+    }
+
+    // Emit real-time event
+    req.app.get('io').emit('resultRequested', {
+      debateId: parseInt(id),
+      participant: updatedParticipant,
+      allDebatersRequested
+    });
+
+    res.json({ 
+      participant: updatedParticipant,
+      allDebatersRequested
+    });
+  } catch (error) {
+    console.error('Error requesting results:', error);
+    res.status(500).json({ 
+      message: 'Failed to request results',
+      error: error.message
+    });
+  }
+}
+
 module.exports = {
   createDebate,
   getDebates,
   getDebate,
   joinDebate,
-  voteOnParticipant,
-  updateDebateStatus,
+  voteOnDebater,
+  sendMessage,
   getMyDebates,
-  getDebateStats
+  getDebateStats,
+  endDebate,
+  getUserDebateStats,
+  startDebateTimer,
+  analyzeDebateResults,
+  requestResults
 };

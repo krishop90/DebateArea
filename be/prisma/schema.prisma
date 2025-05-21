@@ -42,6 +42,7 @@ model Debate {
   categoryId  Int?
   participants DebateParticipant[]
   comments    Comment[]
+  results     Json?     // Store debate results and AI analysis
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -56,6 +57,7 @@ model DebateParticipant {
   position    String?   // User's position/argument in the debate
   votes       Vote[]    // votes received by this participant (if debater)
   joinedAt    DateTime  @default(now())
+  hasRequestedResults Boolean @default(false)
 
   @@unique([userId, debateId])
 }

@@ -142,6 +142,7 @@ exports.Prisma.DebateScalarFieldEnum = {
   description: 'description',
   status: 'status',
   categoryId: 'categoryId',
+  results: 'results',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -152,7 +153,8 @@ exports.Prisma.DebateParticipantScalarFieldEnum = {
   debateId: 'debateId',
   role: 'role',
   position: 'position',
-  joinedAt: 'joinedAt'
+  joinedAt: 'joinedAt',
+  hasRequestedResults: 'hasRequestedResults'
 };
 
 exports.Prisma.VoteScalarFieldEnum = {
@@ -186,6 +188,11 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -194,6 +201,12 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 exports.AuthProvider = exports.$Enums.AuthProvider = {
   LOCAL: 'LOCAL',

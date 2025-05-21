@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { BrowserRouter, Routes, Route, createBrowserRouter, RouterProvider, createRoutesFromElements, Navigate } from 'react-router-dom'
 import Dashboard from "./pages/Dashboard"
 import DebatePage from "./pages/DebatePage"
 import ProfilePage from "./pages/ProfilePage"
@@ -9,6 +9,8 @@ import MyDebatesPage from "./pages/MyDebatesPage"
 import SettingsPage from "./pages/SettingsPage"
 import { ThemeProvider } from "./components/theme-provider"
 import { AuthProvider, useAuth } from "./lib/auth-context"
+import { SocketProvider } from './lib/socket-context'
+import { Toaster } from 'sonner'
 import "./index.css"
 
 // Protected Route component
@@ -26,13 +28,14 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-function AppRoutes() {
-  return (
-    <Routes>
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route 
         path="/debate/:id" 
         element={
@@ -65,20 +68,24 @@ function AppRoutes() {
           </ProtectedRoute>
         } 
       />
-    </Routes>
-  );
-}
+    </Route>
+  ),
+  {
+    future: {
+      v7_startTransition: true
+    }
+  }
+)
 
-function App() {
+export default function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <AuthProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
+        <SocketProvider>
+          <Toaster position="top-right" />
+          <RouterProvider router={router} />
+        </SocketProvider>
       </AuthProvider>
     </ThemeProvider>
   )
 }
-
-export default App

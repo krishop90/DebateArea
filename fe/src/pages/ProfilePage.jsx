@@ -1,8 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { ArrowLeft, Edit, Save } from "lucide-react"
+import { useAuth } from "../lib/auth-context"
+import { auth } from "../lib/api"
 
 import { Button } from "../components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar"
@@ -12,88 +14,74 @@ import { Label } from "../components/ui/label"
 import { Textarea } from "../components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Badge } from "../components/ui/badge"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../components/ui/alert-dialog"
+import { toast } from "sonner"
 
 export default function ProfilePage() {
+  const navigate = useNavigate()
+  const { user, logout, updateProfile } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState("profile")
-  const [userData, setUserData] = useState({
-    id: 1,
-    name: "Alex Johnson",
-    email: "alex.johnson@example.com",
-    bio: "Passionate about debating social and economic issues. I believe in evidence-based arguments and respectful discourse.",
-    avatar: "/placeholder-user.jpg",
-    isVerified: true,
-    createdAt: "2023-01-15T10:30:00Z",
-    debates: [
-      {
-        id: 1,
-        topic: "Universal Basic Income: Solution or Problem?",
-        role: "DEBATER",
-        status: "ONGOING",
-        createdAt: "2023-05-14T14:20:00Z",
-      },
-      {
-        id: 2,
-        topic: "Should AI Development Be Regulated?",
-        role: "AUDIENCE",
-        status: "WAITING",
-        createdAt: "2023-05-15T10:30:00Z",
-      },
-      {
-        id: 3,
-        topic: "Climate Change: Individual vs Corporate Responsibility",
-        role: "DEBATER",
-        status: "FINISHED",
-        createdAt: "2023-05-10T09:15:00Z",
-      },
-    ],
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    bio: user?.bio || "",
   })
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-  }
-
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "WAITING":
-        return <Badge className="bg-yellow-500 hover:bg-yellow-600">Waiting</Badge>
-      case "ONGOING":
-        return <Badge className="bg-green-500 hover:bg-green-600">Ongoing</Badge>
-      case "FINISHED":
-        return <Badge className="bg-gray-500 hover:bg-gray-600">Finished</Badge>
-      default:
-        return <Badge>Unknown</Badge>
-    }
-  }
-
-  const handleSaveChanges = () => {
-    // In a real app, you would send this to an API
-    alert("Profile changes saved!")
-    setIsEditing(false)
-  }
 
   const handleInputChange = (e) => {
     const { id, value } = e.target
-    setUserData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [id]: value,
     }))
+  }
+
+  const handleSaveChanges = async () => {
+    try {
+      setLoading(true)
+      await updateProfile(formData)
+      toast.success("Profile updated successfully")
+      setIsEditing(false)
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update profile")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate("/")
+    toast.success("Logged out successfully")
+  }
+
+  const handleDeleteAccount = async () => {
+    try {
+      setLoading(true)
+      await auth.deleteAccount()
+      logout()
+      navigate("/")
+      toast.success("Account deleted successfully")
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete account")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center">
+        <div className="container flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Link>
+          <Button variant="outline" onClick={handleLogout}>
+            Logout
+          </Button>
         </div>
       </header>
 
@@ -122,31 +110,26 @@ export default function ProfilePage() {
                   <CardContent className="space-y-4">
                     <div className="flex flex-col items-center sm:flex-row sm:gap-4">
                       <Avatar className="h-24 w-24">
-                        <AvatarImage src={userData.avatar || "/placeholder.svg"} alt={userData.name} />
-                        <AvatarFallback>{userData.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={user?.avatar || "/placeholder.svg"} alt={user?.name} />
+                        <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
                       </Avatar>
-                      {isEditing && (
-                        <Button variant="outline" size="sm" className="mt-2 sm:mt-0">
-                          Change Avatar
-                        </Button>
-                      )}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="name">Name</Label>
                       {isEditing ? (
-                        <Input id="name" value={userData.name} onChange={handleInputChange} />
+                        <Input id="name" value={formData.name} onChange={handleInputChange} />
                       ) : (
-                        <p className="text-sm">{userData.name}</p>
+                        <p className="text-sm">{formData.name}</p>
                       )}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
                       {isEditing ? (
-                        <Input id="email" value={userData.email} onChange={handleInputChange} />
+                        <Input id="email" value={formData.email} onChange={handleInputChange} />
                       ) : (
-                        <p className="text-sm">{userData.email}</p>
+                        <p className="text-sm">{formData.email}</p>
                       )}
                     </div>
 
@@ -155,25 +138,13 @@ export default function ProfilePage() {
                       {isEditing ? (
                         <Textarea
                           id="bio"
-                          value={userData.bio}
+                          value={formData.bio}
                           onChange={handleInputChange}
                           className="min-h-[100px]"
                         />
                       ) : (
-                        <p className="text-sm">{userData.bio}</p>
+                        <p className="text-sm">{formData.bio}</p>
                       )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Account Status</Label>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={userData.isVerified ? "default" : "outline"}>
-                          {userData.isVerified ? "Verified" : "Unverified"}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          Member since {formatDate(userData.createdAt)}
-                        </span>
-                      </div>
                     </div>
                   </CardContent>
                   <CardFooter>
@@ -182,7 +153,9 @@ export default function ProfilePage() {
                         <Button variant="outline" onClick={() => setIsEditing(false)}>
                           Cancel
                         </Button>
-                        <Button onClick={handleSaveChanges}>Save Changes</Button>
+                        <Button onClick={handleSaveChanges} disabled={loading}>
+                          {loading ? "Saving..." : "Save Changes"}
+                        </Button>
                       </div>
                     )}
                   </CardFooter>
@@ -196,24 +169,8 @@ export default function ProfilePage() {
                     <CardDescription>Debates you've participated in</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {userData.debates.map((debate) => (
-                        <div
-                          key={debate.id}
-                          className="flex flex-col sm:flex-row justify-between gap-2 border-b pb-4 last:border-0"
-                        >
-                          <div>
-                            <Link to={`/debate/${debate.id}`} className="font-medium hover:underline">
-                              {debate.topic}
-                            </Link>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                              <Badge variant="outline">{debate.role}</Badge>
-                              {getStatusBadge(debate.status)}
-                            </div>
-                          </div>
-                          <div className="text-sm text-muted-foreground">{formatDate(debate.createdAt)}</div>
-                        </div>
-                      ))}
+                    <div className="text-sm text-muted-foreground">
+                      Your debate history will appear here.
                     </div>
                   </CardContent>
                 </Card>
@@ -225,47 +182,31 @@ export default function ProfilePage() {
           <div>
             <Card>
               <CardHeader>
-                <CardTitle>Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Debates:</span>
-                  <span className="font-medium">{userData.debates.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">As Debater:</span>
-                  <span className="font-medium">{userData.debates.filter((d) => d.role === "DEBATER").length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">As Audience:</span>
-                  <span className="font-medium">{userData.debates.filter((d) => d.role === "AUDIENCE").length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Active Debates:</span>
-                  <span className="font-medium">
-                    {userData.debates.filter((d) => d.status === "ONGOING" || d.status === "WAITING").length}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="mt-6">
-              <CardHeader>
                 <CardTitle>Account Settings</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
-                  Change Password
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  Notification Settings
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  Privacy Settings
-                </Button>
-                <Button variant="outline" className="w-full justify-start text-destructive hover:text-destructive">
-                  Delete Account
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="w-full justify-start">
+                      Delete Account
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your account
+                        and remove all your data from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteAccount} disabled={loading}>
+                        {loading ? "Deleting..." : "Delete Account"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </CardContent>
             </Card>
           </div>

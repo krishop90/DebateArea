@@ -2829,6 +2829,7 @@ export namespace Prisma {
     description: number
     status: number
     categoryId: number
+    results: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -2871,6 +2872,7 @@ export namespace Prisma {
     description?: true
     status?: true
     categoryId?: true
+    results?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2968,6 +2970,7 @@ export namespace Prisma {
     description: string | null
     status: $Enums.DebateStatus
     categoryId: number | null
+    results: JsonValue | null
     createdAt: Date
     updatedAt: Date
     _count: DebateCountAggregateOutputType | null
@@ -2997,6 +3000,7 @@ export namespace Prisma {
     description?: boolean
     status?: boolean
     categoryId?: boolean
+    results?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | Debate$categoryArgs<ExtArgs>
@@ -3011,6 +3015,7 @@ export namespace Prisma {
     description?: boolean
     status?: boolean
     categoryId?: boolean
+    results?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | Debate$categoryArgs<ExtArgs>
@@ -3022,6 +3027,7 @@ export namespace Prisma {
     description?: boolean
     status?: boolean
     categoryId?: boolean
+    results?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | Debate$categoryArgs<ExtArgs>
@@ -3033,11 +3039,12 @@ export namespace Prisma {
     description?: boolean
     status?: boolean
     categoryId?: boolean
+    results?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type DebateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "topic" | "description" | "status" | "categoryId" | "createdAt" | "updatedAt", ExtArgs["result"]["debate"]>
+  export type DebateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "topic" | "description" | "status" | "categoryId" | "results" | "createdAt" | "updatedAt", ExtArgs["result"]["debate"]>
   export type DebateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | Debate$categoryArgs<ExtArgs>
     participants?: boolean | Debate$participantsArgs<ExtArgs>
@@ -3064,6 +3071,7 @@ export namespace Prisma {
       description: string | null
       status: $Enums.DebateStatus
       categoryId: number | null
+      results: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["debate"]>
@@ -3497,6 +3505,7 @@ export namespace Prisma {
     readonly description: FieldRef<"Debate", 'String'>
     readonly status: FieldRef<"Debate", 'DebateStatus'>
     readonly categoryId: FieldRef<"Debate", 'Int'>
+    readonly results: FieldRef<"Debate", 'Json'>
     readonly createdAt: FieldRef<"Debate", 'DateTime'>
     readonly updatedAt: FieldRef<"Debate", 'DateTime'>
   }
@@ -4011,6 +4020,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole | null
     position: string | null
     joinedAt: Date | null
+    hasRequestedResults: boolean | null
   }
 
   export type DebateParticipantMaxAggregateOutputType = {
@@ -4020,6 +4030,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole | null
     position: string | null
     joinedAt: Date | null
+    hasRequestedResults: boolean | null
   }
 
   export type DebateParticipantCountAggregateOutputType = {
@@ -4029,6 +4040,7 @@ export namespace Prisma {
     role: number
     position: number
     joinedAt: number
+    hasRequestedResults: number
     _all: number
   }
 
@@ -4052,6 +4064,7 @@ export namespace Prisma {
     role?: true
     position?: true
     joinedAt?: true
+    hasRequestedResults?: true
   }
 
   export type DebateParticipantMaxAggregateInputType = {
@@ -4061,6 +4074,7 @@ export namespace Prisma {
     role?: true
     position?: true
     joinedAt?: true
+    hasRequestedResults?: true
   }
 
   export type DebateParticipantCountAggregateInputType = {
@@ -4070,6 +4084,7 @@ export namespace Prisma {
     role?: true
     position?: true
     joinedAt?: true
+    hasRequestedResults?: true
     _all?: true
   }
 
@@ -4166,6 +4181,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position: string | null
     joinedAt: Date
+    hasRequestedResults: boolean
     _count: DebateParticipantCountAggregateOutputType | null
     _avg: DebateParticipantAvgAggregateOutputType | null
     _sum: DebateParticipantSumAggregateOutputType | null
@@ -4194,6 +4210,7 @@ export namespace Prisma {
     role?: boolean
     position?: boolean
     joinedAt?: boolean
+    hasRequestedResults?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     debate?: boolean | DebateDefaultArgs<ExtArgs>
     votes?: boolean | DebateParticipant$votesArgs<ExtArgs>
@@ -4207,6 +4224,7 @@ export namespace Prisma {
     role?: boolean
     position?: boolean
     joinedAt?: boolean
+    hasRequestedResults?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     debate?: boolean | DebateDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["debateParticipant"]>
@@ -4218,6 +4236,7 @@ export namespace Prisma {
     role?: boolean
     position?: boolean
     joinedAt?: boolean
+    hasRequestedResults?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     debate?: boolean | DebateDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["debateParticipant"]>
@@ -4229,9 +4248,10 @@ export namespace Prisma {
     role?: boolean
     position?: boolean
     joinedAt?: boolean
+    hasRequestedResults?: boolean
   }
 
-  export type DebateParticipantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "debateId" | "role" | "position" | "joinedAt", ExtArgs["result"]["debateParticipant"]>
+  export type DebateParticipantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "debateId" | "role" | "position" | "joinedAt" | "hasRequestedResults", ExtArgs["result"]["debateParticipant"]>
   export type DebateParticipantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     debate?: boolean | DebateDefaultArgs<ExtArgs>
@@ -4261,6 +4281,7 @@ export namespace Prisma {
       role: $Enums.ParticipantRole
       position: string | null
       joinedAt: Date
+      hasRequestedResults: boolean
     }, ExtArgs["result"]["debateParticipant"]>
     composites: {}
   }
@@ -4693,6 +4714,7 @@ export namespace Prisma {
     readonly role: FieldRef<"DebateParticipant", 'ParticipantRole'>
     readonly position: FieldRef<"DebateParticipant", 'String'>
     readonly joinedAt: FieldRef<"DebateParticipant", 'DateTime'>
+    readonly hasRequestedResults: FieldRef<"DebateParticipant", 'Boolean'>
   }
     
 
@@ -8524,6 +8546,7 @@ export namespace Prisma {
     description: 'description',
     status: 'status',
     categoryId: 'categoryId',
+    results: 'results',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -8537,7 +8560,8 @@ export namespace Prisma {
     debateId: 'debateId',
     role: 'role',
     position: 'position',
-    joinedAt: 'joinedAt'
+    joinedAt: 'joinedAt',
+    hasRequestedResults: 'hasRequestedResults'
   };
 
   export type DebateParticipantScalarFieldEnum = (typeof DebateParticipantScalarFieldEnum)[keyof typeof DebateParticipantScalarFieldEnum]
@@ -8586,6 +8610,14 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
   export const QueryMode: {
     default: 'default',
     insensitive: 'insensitive'
@@ -8600,6 +8632,15 @@ export namespace Prisma {
   };
 
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   /**
@@ -8681,6 +8722,20 @@ export namespace Prisma {
    * Reference to a field of type 'DebateStatus[]'
    */
   export type ListEnumDebateStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DebateStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -8827,6 +8882,7 @@ export namespace Prisma {
     description?: StringNullableFilter<"Debate"> | string | null
     status?: EnumDebateStatusFilter<"Debate"> | $Enums.DebateStatus
     categoryId?: IntNullableFilter<"Debate"> | number | null
+    results?: JsonNullableFilter<"Debate">
     createdAt?: DateTimeFilter<"Debate"> | Date | string
     updatedAt?: DateTimeFilter<"Debate"> | Date | string
     category?: XOR<CategoryNullableScalarRelationFilter, CategoryWhereInput> | null
@@ -8840,6 +8896,7 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     status?: SortOrder
     categoryId?: SortOrderInput | SortOrder
+    results?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     category?: CategoryOrderByWithRelationInput
@@ -8856,6 +8913,7 @@ export namespace Prisma {
     description?: StringNullableFilter<"Debate"> | string | null
     status?: EnumDebateStatusFilter<"Debate"> | $Enums.DebateStatus
     categoryId?: IntNullableFilter<"Debate"> | number | null
+    results?: JsonNullableFilter<"Debate">
     createdAt?: DateTimeFilter<"Debate"> | Date | string
     updatedAt?: DateTimeFilter<"Debate"> | Date | string
     category?: XOR<CategoryNullableScalarRelationFilter, CategoryWhereInput> | null
@@ -8869,6 +8927,7 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     status?: SortOrder
     categoryId?: SortOrderInput | SortOrder
+    results?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: DebateCountOrderByAggregateInput
@@ -8887,6 +8946,7 @@ export namespace Prisma {
     description?: StringNullableWithAggregatesFilter<"Debate"> | string | null
     status?: EnumDebateStatusWithAggregatesFilter<"Debate"> | $Enums.DebateStatus
     categoryId?: IntNullableWithAggregatesFilter<"Debate"> | number | null
+    results?: JsonNullableWithAggregatesFilter<"Debate">
     createdAt?: DateTimeWithAggregatesFilter<"Debate"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Debate"> | Date | string
   }
@@ -8901,6 +8961,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFilter<"DebateParticipant"> | $Enums.ParticipantRole
     position?: StringNullableFilter<"DebateParticipant"> | string | null
     joinedAt?: DateTimeFilter<"DebateParticipant"> | Date | string
+    hasRequestedResults?: BoolFilter<"DebateParticipant"> | boolean
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     debate?: XOR<DebateScalarRelationFilter, DebateWhereInput>
     votes?: VoteListRelationFilter
@@ -8913,6 +8974,7 @@ export namespace Prisma {
     role?: SortOrder
     position?: SortOrderInput | SortOrder
     joinedAt?: SortOrder
+    hasRequestedResults?: SortOrder
     user?: UserOrderByWithRelationInput
     debate?: DebateOrderByWithRelationInput
     votes?: VoteOrderByRelationAggregateInput
@@ -8929,6 +8991,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFilter<"DebateParticipant"> | $Enums.ParticipantRole
     position?: StringNullableFilter<"DebateParticipant"> | string | null
     joinedAt?: DateTimeFilter<"DebateParticipant"> | Date | string
+    hasRequestedResults?: BoolFilter<"DebateParticipant"> | boolean
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     debate?: XOR<DebateScalarRelationFilter, DebateWhereInput>
     votes?: VoteListRelationFilter
@@ -8941,6 +9004,7 @@ export namespace Prisma {
     role?: SortOrder
     position?: SortOrderInput | SortOrder
     joinedAt?: SortOrder
+    hasRequestedResults?: SortOrder
     _count?: DebateParticipantCountOrderByAggregateInput
     _avg?: DebateParticipantAvgOrderByAggregateInput
     _max?: DebateParticipantMaxOrderByAggregateInput
@@ -8958,6 +9022,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleWithAggregatesFilter<"DebateParticipant"> | $Enums.ParticipantRole
     position?: StringNullableWithAggregatesFilter<"DebateParticipant"> | string | null
     joinedAt?: DateTimeWithAggregatesFilter<"DebateParticipant"> | Date | string
+    hasRequestedResults?: BoolWithAggregatesFilter<"DebateParticipant"> | boolean
   }
 
   export type VoteWhereInput = {
@@ -9273,6 +9338,7 @@ export namespace Prisma {
     topic: string
     description?: string | null
     status?: $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutDebatesInput
@@ -9286,6 +9352,7 @@ export namespace Prisma {
     description?: string | null
     status?: $Enums.DebateStatus
     categoryId?: number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     participants?: DebateParticipantUncheckedCreateNestedManyWithoutDebateInput
@@ -9296,6 +9363,7 @@ export namespace Prisma {
     topic?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutDebatesNestedInput
@@ -9309,6 +9377,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
     categoryId?: NullableIntFieldUpdateOperationsInput | number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: DebateParticipantUncheckedUpdateManyWithoutDebateNestedInput
@@ -9321,6 +9390,7 @@ export namespace Prisma {
     description?: string | null
     status?: $Enums.DebateStatus
     categoryId?: number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -9329,6 +9399,7 @@ export namespace Prisma {
     topic?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9339,6 +9410,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
     categoryId?: NullableIntFieldUpdateOperationsInput | number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9347,6 +9419,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
+    hasRequestedResults?: boolean
     user: UserCreateNestedOneWithoutDebatesAsDebaterInput
     debate: DebateCreateNestedOneWithoutParticipantsInput
     votes?: VoteCreateNestedManyWithoutParticipantInput
@@ -9359,6 +9432,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
+    hasRequestedResults?: boolean
     votes?: VoteUncheckedCreateNestedManyWithoutParticipantInput
   }
 
@@ -9366,6 +9440,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
     user?: UserUpdateOneRequiredWithoutDebatesAsDebaterNestedInput
     debate?: DebateUpdateOneRequiredWithoutParticipantsNestedInput
     votes?: VoteUpdateManyWithoutParticipantNestedInput
@@ -9378,6 +9453,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
     votes?: VoteUncheckedUpdateManyWithoutParticipantNestedInput
   }
 
@@ -9388,12 +9464,14 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
+    hasRequestedResults?: boolean
   }
 
   export type DebateParticipantUpdateManyMutationInput = {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type DebateParticipantUncheckedUpdateManyInput = {
@@ -9403,6 +9481,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type VoteCreateInput = {
@@ -9841,6 +9920,29 @@ export namespace Prisma {
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type CategoryNullableScalarRelationFilter = {
     is?: CategoryWhereInput | null
@@ -9853,6 +9955,7 @@ export namespace Prisma {
     description?: SortOrder
     status?: SortOrder
     categoryId?: SortOrder
+    results?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -9930,6 +10033,32 @@ export namespace Prisma {
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
 
   export type EnumParticipantRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.ParticipantRole | EnumParticipantRoleFieldRefInput<$PrismaModel>
@@ -9960,6 +10089,7 @@ export namespace Prisma {
     role?: SortOrder
     position?: SortOrder
     joinedAt?: SortOrder
+    hasRequestedResults?: SortOrder
   }
 
   export type DebateParticipantAvgOrderByAggregateInput = {
@@ -9975,6 +10105,7 @@ export namespace Prisma {
     role?: SortOrder
     position?: SortOrder
     joinedAt?: SortOrder
+    hasRequestedResults?: SortOrder
   }
 
   export type DebateParticipantMinOrderByAggregateInput = {
@@ -9984,6 +10115,7 @@ export namespace Prisma {
     role?: SortOrder
     position?: SortOrder
     joinedAt?: SortOrder
+    hasRequestedResults?: SortOrder
   }
 
   export type DebateParticipantSumOrderByAggregateInput = {
@@ -10812,6 +10944,29 @@ export namespace Prisma {
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedEnumParticipantRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.ParticipantRole | EnumParticipantRoleFieldRefInput<$PrismaModel>
@@ -10834,6 +10989,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
+    hasRequestedResults?: boolean
     debate: DebateCreateNestedOneWithoutParticipantsInput
     votes?: VoteCreateNestedManyWithoutParticipantInput
   }
@@ -10844,6 +11000,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
+    hasRequestedResults?: boolean
     votes?: VoteUncheckedCreateNestedManyWithoutParticipantInput
   }
 
@@ -10933,6 +11090,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFilter<"DebateParticipant"> | $Enums.ParticipantRole
     position?: StringNullableFilter<"DebateParticipant"> | string | null
     joinedAt?: DateTimeFilter<"DebateParticipant"> | Date | string
+    hasRequestedResults?: BoolFilter<"DebateParticipant"> | boolean
   }
 
   export type VoteUpsertWithWhereUniqueWithoutVoterInput = {
@@ -11015,6 +11173,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
+    hasRequestedResults?: boolean
     user: UserCreateNestedOneWithoutDebatesAsDebaterInput
     votes?: VoteCreateNestedManyWithoutParticipantInput
   }
@@ -11025,6 +11184,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
+    hasRequestedResults?: boolean
     votes?: VoteUncheckedCreateNestedManyWithoutParticipantInput
   }
 
@@ -11167,6 +11327,7 @@ export namespace Prisma {
     topic: string
     description?: string | null
     status?: $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutDebatesInput
@@ -11179,6 +11340,7 @@ export namespace Prisma {
     description?: string | null
     status?: $Enums.DebateStatus
     categoryId?: number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     comments?: CommentUncheckedCreateNestedManyWithoutDebateInput
@@ -11273,6 +11435,7 @@ export namespace Prisma {
     topic?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutDebatesNestedInput
@@ -11285,6 +11448,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
     categoryId?: NullableIntFieldUpdateOperationsInput | number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUncheckedUpdateManyWithoutDebateNestedInput
@@ -11350,6 +11514,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
+    hasRequestedResults?: boolean
     user: UserCreateNestedOneWithoutDebatesAsDebaterInput
     debate: DebateCreateNestedOneWithoutParticipantsInput
   }
@@ -11361,6 +11526,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
+    hasRequestedResults?: boolean
   }
 
   export type DebateParticipantCreateOrConnectWithoutVotesInput = {
@@ -11429,6 +11595,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
     user?: UserUpdateOneRequiredWithoutDebatesAsDebaterNestedInput
     debate?: DebateUpdateOneRequiredWithoutParticipantsNestedInput
   }
@@ -11440,6 +11607,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type UserCreateWithoutCommentsInput = {
@@ -11486,6 +11654,7 @@ export namespace Prisma {
     topic: string
     description?: string | null
     status?: $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutDebatesInput
@@ -11498,6 +11667,7 @@ export namespace Prisma {
     description?: string | null
     status?: $Enums.DebateStatus
     categoryId?: number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     participants?: DebateParticipantUncheckedCreateNestedManyWithoutDebateInput
@@ -11569,6 +11739,7 @@ export namespace Prisma {
     topic?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutDebatesNestedInput
@@ -11581,6 +11752,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
     categoryId?: NullableIntFieldUpdateOperationsInput | number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: DebateParticipantUncheckedUpdateManyWithoutDebateNestedInput
@@ -11590,6 +11762,7 @@ export namespace Prisma {
     topic: string
     description?: string | null
     status?: $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     participants?: DebateParticipantCreateNestedManyWithoutDebateInput
@@ -11601,6 +11774,7 @@ export namespace Prisma {
     topic: string
     description?: string | null
     status?: $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     participants?: DebateParticipantUncheckedCreateNestedManyWithoutDebateInput
@@ -11642,6 +11816,7 @@ export namespace Prisma {
     description?: StringNullableFilter<"Debate"> | string | null
     status?: EnumDebateStatusFilter<"Debate"> | $Enums.DebateStatus
     categoryId?: IntNullableFilter<"Debate"> | number | null
+    results?: JsonNullableFilter<"Debate">
     createdAt?: DateTimeFilter<"Debate"> | Date | string
     updatedAt?: DateTimeFilter<"Debate"> | Date | string
   }
@@ -11652,6 +11827,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
+    hasRequestedResults?: boolean
   }
 
   export type VoteCreateManyVoterInput = {
@@ -11674,6 +11850,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
     debate?: DebateUpdateOneRequiredWithoutParticipantsNestedInput
     votes?: VoteUpdateManyWithoutParticipantNestedInput
   }
@@ -11684,6 +11861,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
     votes?: VoteUncheckedUpdateManyWithoutParticipantNestedInput
   }
 
@@ -11693,6 +11871,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type VoteUpdateWithoutVoterInput = {
@@ -11747,6 +11926,7 @@ export namespace Prisma {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
+    hasRequestedResults?: boolean
   }
 
   export type CommentCreateManyDebateInput = {
@@ -11762,6 +11942,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
     user?: UserUpdateOneRequiredWithoutDebatesAsDebaterNestedInput
     votes?: VoteUpdateManyWithoutParticipantNestedInput
   }
@@ -11772,6 +11953,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
     votes?: VoteUncheckedUpdateManyWithoutParticipantNestedInput
   }
 
@@ -11781,6 +11963,7 @@ export namespace Prisma {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type CommentUpdateWithoutDebateInput = {
@@ -11841,6 +12024,7 @@ export namespace Prisma {
     topic: string
     description?: string | null
     status?: $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11849,6 +12033,7 @@ export namespace Prisma {
     topic?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: DebateParticipantUpdateManyWithoutDebateNestedInput
@@ -11860,6 +12045,7 @@ export namespace Prisma {
     topic?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: DebateParticipantUncheckedUpdateManyWithoutDebateNestedInput
@@ -11871,6 +12057,7 @@ export namespace Prisma {
     topic?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
