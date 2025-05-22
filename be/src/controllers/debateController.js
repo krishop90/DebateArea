@@ -2,6 +2,7 @@
 
 const prisma = require('../prisma');
 const axios = require('axios');
+const { analyzeDebate } = require('../utils/aiUtils');
 
 // Create a new debate
 async function createDebate(req, res) {
@@ -14,6 +15,7 @@ async function createDebate(req, res) {
         topic,
         description,
         status: 'WAITING',
+        creatorId: req.user.id,
         category: categoryId ? {
           connect: { id: parseInt(categoryId) }
         } : undefined,
@@ -30,7 +32,8 @@ async function createDebate(req, res) {
             user: true
           }
         },
-        category: true
+        category: true,
+        creator: true
       }
     });
 
@@ -100,7 +103,8 @@ async function getDebate(req, res) {
         participants: {
           include: {
             user: true,
-            votes: true
+            votesReceived: true,
+            votesGiven: true
           }
         },
         category: true,
@@ -248,9 +252,9 @@ async function joinDebate(req, res) {
 async function voteOnDebater(req, res) {
   try {
     const { id } = req.params;
-    const { participantId, vote } = req.body;
+    const { participantId, vote, messageId } = req.body;
 
-    if (!participantId || vote === undefined) {
+    if (!participantId || vote === undefined || !messageId) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -262,7 +266,13 @@ async function voteOnDebater(req, res) {
     const debate = await prisma.debate.findUnique({
       where: { id: parseInt(id) },
       include: {
-        participants: true
+        participants: {
+          include: {
+            user: true,
+            votesReceived: true,
+            votesGiven: true
+          }
+        }
       }
     });
 
@@ -280,20 +290,25 @@ async function voteOnDebater(req, res) {
       return res.status(400).json({ message: 'Invalid debater' });
     }
 
-    // Create or update vote
-    const voteRecord = await prisma.vote.upsert({
+    // Check if user has already voted on this message
+    const existingVote = await prisma.vote.findFirst({
       where: {
-        voterId_participantId: {
-          voterId: voter.id,
-          participantId: parseInt(participantId)
-        }
-      },
-      update: {
-        value: vote
-      },
-      create: {
         voterId: voter.id,
         participantId: parseInt(participantId),
+        messageId: parseInt(messageId)
+      }
+    });
+
+    if (existingVote) {
+      return res.status(400).json({ message: 'You have already voted on this message' });
+    }
+
+    // Create vote
+    const voteRecord = await prisma.vote.create({
+      data: {
+        voterId: voter.id,
+        participantId: parseInt(participantId),
+        messageId: parseInt(messageId),
         value: vote
       }
     });
@@ -305,13 +320,15 @@ async function voteOnDebater(req, res) {
         participants: {
           include: {
             user: true,
-            votes: true
+            votesReceived: true,
+            votesGiven: true
           }
         },
         category: true
       }
     });
 
+    // Emit real-time event
     req.app.get('io').emit('voteUpdated', {
       debateId: parseInt(id),
       participantId: parseInt(participantId),
@@ -378,12 +395,17 @@ async function sendMessage(req, res) {
   }
 }
 
-// Get debates created by the current user
+// Get debates created by or participated in by the current user
 async function getMyDebates(req, res) {
   try {
     const { search, status } = req.query;
     const where = {
-      creatorId: req.user.id
+      participants: {
+        some: {
+          userId: req.user.id,
+          role: 'DEBATER'  // Only get debates where user was a debater
+        }
+      }
     };
 
     if (search) {
@@ -402,10 +424,14 @@ async function getMyDebates(req, res) {
       include: {
         participants: {
           include: {
-            user: true
+            user: true,
+            votesReceived: true,
+            votesGiven: true
           }
         },
-        category: true
+        category: true,
+        creator: true,
+        results: true
       },
       orderBy: {
         createdAt: 'desc'
@@ -477,7 +503,7 @@ async function getDebateStats(req, res) {
   }
 }
 
-// Analyze debate results using AI
+// Analyze debate results
 async function analyzeDebateResults(debate, results) {
   try {
     if (!debate || !debate.comments) {
@@ -485,108 +511,52 @@ async function analyzeDebateResults(debate, results) {
       return null;
     }
 
-    const messages = debate.comments.map(msg => ({
-      content: msg.content,
-      user: msg.user.name,
-      role: debate.participants.find(p => p.userId === msg.userId)?.role || 'AUDIENCE'
-    }));
-
-    const prompt = `As an AI debate judge, analyze this debate and provide a comprehensive evaluation:
-
-    Topic: ${debate.topic}
-    Description: ${debate.description}
-    Messages: ${JSON.stringify(messages)}
-    Results: ${JSON.stringify(results)}
+    // Get AI analysis
+    const aiAnalysis = await analyzeDebate(debate, results);
     
-    Please provide a detailed analysis in the following format:
-
-    1. OVERALL ASSESSMENT
-    - Debate quality (1-10)
-    - Engagement level (1-10)
-    - Topic coverage (1-10)
-
-    2. DEBATER PERFORMANCE
-    For each debater:
-    - Argument strength (1-10)
-    - Evidence usage (1-10)
-    - Rhetorical skills (1-10)
-    - Response quality (1-10)
-    - Areas of strength
-    - Areas for improvement
-
-    3. KEY ARGUMENTS
-    - Main points presented
-    - Quality of supporting evidence
-    - Logical consistency
-
-    4. INTERACTION ANALYSIS
-    - Quality of rebuttals
-    - Engagement with opposing arguments
-    - Respect for debate format
-
-    5. FINAL VERDICT
-    - Winner justification
-    - Key factors in decision
-    - Suggestions for future debates
-
-    Please be specific and provide concrete examples from the debate.`;
-
-    try {
-      const response = await axios.post(
-        'https://api-inference.huggingface.co/models/facebook/opt-350m',
-        {
-          inputs: prompt,
-          parameters: {
-            max_length: 1000,
-            temperature: 0.7,
-            top_p: 0.9
-          }
+    if (!aiAnalysis) {
+      // Fallback to basic analysis if AI fails
+      return {
+        overallAssessment: {
+          debateQuality: Number((Math.min(10, Math.max(1, (results.reduce((sum, r) => sum + r.messages, 0) * 0.5) + (results.reduce((sum, r) => sum + r.upvotes - r.downvotes, 0) * 0.3))).toFixed(1))),
+          engagementLevel: Number((Math.min(10, Math.max(1, results.reduce((sum, r) => sum + r.messages, 0) * 0.4))).toFixed(1)),
+          topicCoverage: Number((Math.min(10, Math.max(1, (results.reduce((sum, r) => sum + r.messages, 0) * 0.5) + (results.reduce((sum, r) => sum + r.upvotes - r.downvotes, 0) * 0.3))).toFixed(1))),
         },
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-            'Content-Type': 'application/json'
-          }
+        debaterAnalysis: results.map(debater => ({
+          userId: debater.userId,
+          name: debater.name,
+          metrics: {
+            argumentStrength: Number((Math.min(10, Math.max(1, (debater.upvotes * 2) - debater.downvotes))).toFixed(1)),
+            evidenceUsage: Number((Math.min(10, Math.max(1, debater.messages * 0.5))).toFixed(1)),
+            rhetoricalSkills: Number((Math.min(10, Math.max(1, (debater.upvotes * 1.5) - (debater.downvotes * 0.5)))).toFixed(1)),
+            engagementLevel: Number((Math.min(10, Math.max(1, debater.messages * 2))).toFixed(1)),
+          },
+        })),
+        finalVerdict: {
+          winner: results.reduce((prev, current) => 
+            (current.upvotes - current.downvotes) > (prev.upvotes - prev.downvotes) ? current : prev
+          ).name,
+          justification: `Won based on vote differential and message count and argument strength`
         }
-      );
-
-      return response.data[0].generated_text;
-    } catch (error) {
-      console.error('Error calling Hugging Face API:', error);
-      // Return a basic analysis if the API call fails
-      return `Basic Debate Analysis:
-
-1. OVERALL ASSESSMENT
-- Debate quality: ${Math.floor(Math.random() * 5) + 5}/10
-- Engagement level: ${Math.floor(Math.random() * 5) + 5}/10
-- Topic coverage: ${Math.floor(Math.random() * 5) + 5}/10
-
-2. DEBATER PERFORMANCE
-${results.map(result => `
-${result.name}:
-- Argument strength: ${Math.floor(Math.random() * 5) + 5}/10
-- Evidence usage: ${Math.floor(Math.random() * 5) + 5}/10
-- Rhetorical skills: ${Math.floor(Math.random() * 5) + 5}/10
-- Response quality: ${Math.floor(Math.random() * 5) + 5}/10
-- Areas of strength: Good engagement with the topic
-- Areas for improvement: Could provide more evidence
-`).join('\n')}
-
-3. KEY ARGUMENTS
-- Main points were presented clearly
-- Some arguments lacked supporting evidence
-- Overall logical consistency was maintained
-
-4. INTERACTION ANALYSIS
-- Debaters engaged with each other's points
-- Some rebuttals could have been stronger
-- Debate format was generally respected
-
-5. FINAL VERDICT
-- Winner: ${results.find(r => r.totalVotes === Math.max(...results.map(r => r.totalVotes)))?.name}
-- Key factors: Argument strength and audience engagement
-- Suggestions: More evidence and stronger rebuttals would improve future debates`;
+      };
     }
+
+    return {
+      ...aiAnalysis,
+      overallAssessment: Object.fromEntries(
+        Object.entries(aiAnalysis.overallAssessment).map(([key, value]) => [key, Number(value.toFixed(1))])
+      ),
+      debaterAnalysis: results.map(debater => ({
+        userId: debater.userId,
+        name: debater.name,
+        metrics: {
+          argumentStrength: Number((Math.min(10, Math.max(1, (debater.upvotes * 2) - debater.downvotes))).toFixed(1)),
+          evidenceUsage: Number((Math.min(10, Math.max(1, debater.messages * 0.5))).toFixed(1)),
+          rhetoricalSkills: Number((Math.min(10, Math.max(1, (debater.upvotes * 1.5) - (debater.downvotes * 0.5)))).toFixed(1)),
+          engagementLevel: Number((Math.min(10, Math.max(1, debater.messages * 2))).toFixed(1))
+        }
+      }))
+    };
   } catch (error) {
     console.error('Error analyzing debate results:', error);
     return null;
@@ -605,7 +575,8 @@ async function endDebate(req, res) {
         participants: {
           include: {
             user: true,
-            votes: true
+            votesReceived: true,
+            votesGiven: true
           }
         },
         comments: {
@@ -631,8 +602,8 @@ async function endDebate(req, res) {
     // Calculate results
     const debaters = debate.participants.filter(p => p.role === 'DEBATER');
     const results = debaters.map(debater => {
-      const upvotes = debater.votes.filter(v => v.value === 1).length;
-      const downvotes = debater.votes.filter(v => v.value === -1).length;
+      const upvotes = debater.votesReceived.filter(v => v.value === 1).length;
+      const downvotes = debater.votesReceived.filter(v => v.value === -1).length;
       const totalVotes = upvotes - downvotes;
       
       return {
@@ -645,17 +616,14 @@ async function endDebate(req, res) {
       };
     });
 
-    // Determine winner
-    const winner = results.reduce((prev, current) => 
-      (current.totalVotes > prev.totalVotes) ? current : prev
-    );
-
     // Get AI analysis
     const aiAnalysis = await analyzeDebateResults(debate, results);
 
     // Prepare results data
     const resultsData = {
-      winnerId: winner.userId,
+      winnerId: results.reduce((prev, current) => 
+        (current.totalVotes > prev.totalVotes) ? current : prev
+      ).userId,
       scores: results,
       aiAnalysis
     };
@@ -670,7 +638,9 @@ async function endDebate(req, res) {
       include: {
         participants: {
           include: {
-            user: true
+            user: true,
+            votesReceived: true,
+            votesGiven: true
           }
         },
         category: true

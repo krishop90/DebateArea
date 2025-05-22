@@ -27,7 +27,7 @@ model User {
   resetToken  String?   // For password reset
   resetTokenExpiry DateTime?
   debatesAsDebater DebateParticipant[]
-  votes       Vote[]
+  debates     Debate[]  // Debates created by the user
   comments    Comment[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -40,6 +40,8 @@ model Debate {
   status      DebateStatus  @default(WAITING)
   category    Category? @relation(fields: [categoryId], references: [id])
   categoryId  Int?
+  creator     User      @relation(fields: [creatorId], references: [id])
+  creatorId   Int
   participants DebateParticipant[]
   comments    Comment[]
   results     Json?     // Store debate results and AI analysis
@@ -55,7 +57,8 @@ model DebateParticipant {
   debateId    Int
   role        ParticipantRole
   position    String?   // User's position/argument in the debate
-  votes       Vote[]    // votes received by this participant (if debater)
+  votesReceived Vote[]  @relation("Participant") // votes received by this participant (if debater)
+  votesGiven   Vote[]  @relation("Voter") // votes given by this participant (if audience)
   joinedAt    DateTime  @default(now())
   hasRequestedResults Boolean @default(false)
 
@@ -64,14 +67,16 @@ model DebateParticipant {
 
 model Vote {
   id          Int       @id @default(autoincrement())
-  voter       User      @relation(fields: [voterId], references: [id])
+  voter       DebateParticipant @relation("Voter", fields: [voterId], references: [id])
   voterId     Int
-  participant DebateParticipant @relation(fields: [participantId], references: [id])
+  participant DebateParticipant @relation("Participant", fields: [participantId], references: [id])
   participantId Int
+  message     Comment   @relation(fields: [messageId], references: [id])
+  messageId   Int
   value       Int       // 1 for upvote, -1 for downvote
   createdAt   DateTime  @default(now())
 
-  @@unique([voterId, participantId])
+  @@unique([voterId, participantId, messageId])
 }
 
 model Comment {
@@ -82,6 +87,7 @@ model Comment {
   debate      Debate    @relation(fields: [debateId], references: [id])
   debateId    Int
   parentId    Int?      // For nested comments
+  votes       Vote[]    // Add relation to votes
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }

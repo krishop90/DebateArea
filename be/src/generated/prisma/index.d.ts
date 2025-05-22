@@ -1368,13 +1368,13 @@ export namespace Prisma {
 
   export type UserCountOutputType = {
     debatesAsDebater: number
-    votes: number
+    debates: number
     comments: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     debatesAsDebater?: boolean | UserCountOutputTypeCountDebatesAsDebaterArgs
-    votes?: boolean | UserCountOutputTypeCountVotesArgs
+    debates?: boolean | UserCountOutputTypeCountDebatesArgs
     comments?: boolean | UserCountOutputTypeCountCommentsArgs
   }
 
@@ -1399,8 +1399,8 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountVotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: VoteWhereInput
+  export type UserCountOutputTypeCountDebatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DebateWhereInput
   }
 
   /**
@@ -1456,11 +1456,13 @@ export namespace Prisma {
    */
 
   export type DebateParticipantCountOutputType = {
-    votes: number
+    votesReceived: number
+    votesGiven: number
   }
 
   export type DebateParticipantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    votes?: boolean | DebateParticipantCountOutputTypeCountVotesArgs
+    votesReceived?: boolean | DebateParticipantCountOutputTypeCountVotesReceivedArgs
+    votesGiven?: boolean | DebateParticipantCountOutputTypeCountVotesGivenArgs
   }
 
   // Custom InputTypes
@@ -1477,7 +1479,45 @@ export namespace Prisma {
   /**
    * DebateParticipantCountOutputType without action
    */
-  export type DebateParticipantCountOutputTypeCountVotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DebateParticipantCountOutputTypeCountVotesReceivedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VoteWhereInput
+  }
+
+  /**
+   * DebateParticipantCountOutputType without action
+   */
+  export type DebateParticipantCountOutputTypeCountVotesGivenArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VoteWhereInput
+  }
+
+
+  /**
+   * Count Type CommentCountOutputType
+   */
+
+  export type CommentCountOutputType = {
+    votes: number
+  }
+
+  export type CommentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    votes?: boolean | CommentCountOutputTypeCountVotesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CommentCountOutputType without action
+   */
+  export type CommentCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CommentCountOutputType
+     */
+    select?: CommentCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CommentCountOutputType without action
+   */
+  export type CommentCountOutputTypeCountVotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: VoteWhereInput
   }
 
@@ -1780,7 +1820,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     debatesAsDebater?: boolean | User$debatesAsDebaterArgs<ExtArgs>
-    votes?: boolean | User$votesArgs<ExtArgs>
+    debates?: boolean | User$debatesArgs<ExtArgs>
     comments?: boolean | User$commentsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -1836,7 +1876,7 @@ export namespace Prisma {
   export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "password" | "provider" | "providerId" | "bio" | "avatar" | "isVerified" | "resetToken" | "resetTokenExpiry" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     debatesAsDebater?: boolean | User$debatesAsDebaterArgs<ExtArgs>
-    votes?: boolean | User$votesArgs<ExtArgs>
+    debates?: boolean | User$debatesArgs<ExtArgs>
     comments?: boolean | User$commentsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -1847,7 +1887,7 @@ export namespace Prisma {
     name: "User"
     objects: {
       debatesAsDebater: Prisma.$DebateParticipantPayload<ExtArgs>[]
-      votes: Prisma.$VotePayload<ExtArgs>[]
+      debates: Prisma.$DebatePayload<ExtArgs>[]
       comments: Prisma.$CommentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -2259,7 +2299,7 @@ export namespace Prisma {
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     debatesAsDebater<T extends User$debatesAsDebaterArgs<ExtArgs> = {}>(args?: Subset<T, User$debatesAsDebaterArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DebateParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    votes<T extends User$votesArgs<ExtArgs> = {}>(args?: Subset<T, User$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    debates<T extends User$debatesArgs<ExtArgs> = {}>(args?: Subset<T, User$debatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DebatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     comments<T extends User$commentsArgs<ExtArgs> = {}>(args?: Subset<T, User$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2715,27 +2755,27 @@ export namespace Prisma {
   }
 
   /**
-   * User.votes
+   * User.debates
    */
-  export type User$votesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$debatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote
+     * Select specific fields to fetch from the Debate
      */
-    select?: VoteSelect<ExtArgs> | null
+    select?: DebateSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote
+     * Omit specific fields from the Debate
      */
-    omit?: VoteOmit<ExtArgs> | null
+    omit?: DebateOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: VoteInclude<ExtArgs> | null
-    where?: VoteWhereInput
-    orderBy?: VoteOrderByWithRelationInput | VoteOrderByWithRelationInput[]
-    cursor?: VoteWhereUniqueInput
+    include?: DebateInclude<ExtArgs> | null
+    where?: DebateWhereInput
+    orderBy?: DebateOrderByWithRelationInput | DebateOrderByWithRelationInput[]
+    cursor?: DebateWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: VoteScalarFieldEnum | VoteScalarFieldEnum[]
+    distinct?: DebateScalarFieldEnum | DebateScalarFieldEnum[]
   }
 
   /**
@@ -2796,11 +2836,13 @@ export namespace Prisma {
   export type DebateAvgAggregateOutputType = {
     id: number | null
     categoryId: number | null
+    creatorId: number | null
   }
 
   export type DebateSumAggregateOutputType = {
     id: number | null
     categoryId: number | null
+    creatorId: number | null
   }
 
   export type DebateMinAggregateOutputType = {
@@ -2809,6 +2851,7 @@ export namespace Prisma {
     description: string | null
     status: $Enums.DebateStatus | null
     categoryId: number | null
+    creatorId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2819,6 +2862,7 @@ export namespace Prisma {
     description: string | null
     status: $Enums.DebateStatus | null
     categoryId: number | null
+    creatorId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2829,6 +2873,7 @@ export namespace Prisma {
     description: number
     status: number
     categoryId: number
+    creatorId: number
     results: number
     createdAt: number
     updatedAt: number
@@ -2839,11 +2884,13 @@ export namespace Prisma {
   export type DebateAvgAggregateInputType = {
     id?: true
     categoryId?: true
+    creatorId?: true
   }
 
   export type DebateSumAggregateInputType = {
     id?: true
     categoryId?: true
+    creatorId?: true
   }
 
   export type DebateMinAggregateInputType = {
@@ -2852,6 +2899,7 @@ export namespace Prisma {
     description?: true
     status?: true
     categoryId?: true
+    creatorId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2862,6 +2910,7 @@ export namespace Prisma {
     description?: true
     status?: true
     categoryId?: true
+    creatorId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2872,6 +2921,7 @@ export namespace Prisma {
     description?: true
     status?: true
     categoryId?: true
+    creatorId?: true
     results?: true
     createdAt?: true
     updatedAt?: true
@@ -2970,6 +3020,7 @@ export namespace Prisma {
     description: string | null
     status: $Enums.DebateStatus
     categoryId: number | null
+    creatorId: number
     results: JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -3000,10 +3051,12 @@ export namespace Prisma {
     description?: boolean
     status?: boolean
     categoryId?: boolean
+    creatorId?: boolean
     results?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | Debate$categoryArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
     participants?: boolean | Debate$participantsArgs<ExtArgs>
     comments?: boolean | Debate$commentsArgs<ExtArgs>
     _count?: boolean | DebateCountOutputTypeDefaultArgs<ExtArgs>
@@ -3015,10 +3068,12 @@ export namespace Prisma {
     description?: boolean
     status?: boolean
     categoryId?: boolean
+    creatorId?: boolean
     results?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | Debate$categoryArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["debate"]>
 
   export type DebateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3027,10 +3082,12 @@ export namespace Prisma {
     description?: boolean
     status?: boolean
     categoryId?: boolean
+    creatorId?: boolean
     results?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | Debate$categoryArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["debate"]>
 
   export type DebateSelectScalar = {
@@ -3039,29 +3096,34 @@ export namespace Prisma {
     description?: boolean
     status?: boolean
     categoryId?: boolean
+    creatorId?: boolean
     results?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type DebateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "topic" | "description" | "status" | "categoryId" | "results" | "createdAt" | "updatedAt", ExtArgs["result"]["debate"]>
+  export type DebateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "topic" | "description" | "status" | "categoryId" | "creatorId" | "results" | "createdAt" | "updatedAt", ExtArgs["result"]["debate"]>
   export type DebateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | Debate$categoryArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
     participants?: boolean | Debate$participantsArgs<ExtArgs>
     comments?: boolean | Debate$commentsArgs<ExtArgs>
     _count?: boolean | DebateCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type DebateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | Debate$categoryArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type DebateIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | Debate$categoryArgs<ExtArgs>
+    creator?: boolean | UserDefaultArgs<ExtArgs>
   }
 
   export type $DebatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Debate"
     objects: {
       category: Prisma.$CategoryPayload<ExtArgs> | null
+      creator: Prisma.$UserPayload<ExtArgs>
       participants: Prisma.$DebateParticipantPayload<ExtArgs>[]
       comments: Prisma.$CommentPayload<ExtArgs>[]
     }
@@ -3071,6 +3133,7 @@ export namespace Prisma {
       description: string | null
       status: $Enums.DebateStatus
       categoryId: number | null
+      creatorId: number
       results: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
@@ -3469,6 +3532,7 @@ export namespace Prisma {
   export interface Prisma__DebateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     category<T extends Debate$categoryArgs<ExtArgs> = {}>(args?: Subset<T, Debate$categoryArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    creator<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     participants<T extends Debate$participantsArgs<ExtArgs> = {}>(args?: Subset<T, Debate$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DebateParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     comments<T extends Debate$commentsArgs<ExtArgs> = {}>(args?: Subset<T, Debate$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -3505,6 +3569,7 @@ export namespace Prisma {
     readonly description: FieldRef<"Debate", 'String'>
     readonly status: FieldRef<"Debate", 'DebateStatus'>
     readonly categoryId: FieldRef<"Debate", 'Int'>
+    readonly creatorId: FieldRef<"Debate", 'Int'>
     readonly results: FieldRef<"Debate", 'Json'>
     readonly createdAt: FieldRef<"Debate", 'DateTime'>
     readonly updatedAt: FieldRef<"Debate", 'DateTime'>
@@ -4213,7 +4278,8 @@ export namespace Prisma {
     hasRequestedResults?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     debate?: boolean | DebateDefaultArgs<ExtArgs>
-    votes?: boolean | DebateParticipant$votesArgs<ExtArgs>
+    votesReceived?: boolean | DebateParticipant$votesReceivedArgs<ExtArgs>
+    votesGiven?: boolean | DebateParticipant$votesGivenArgs<ExtArgs>
     _count?: boolean | DebateParticipantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["debateParticipant"]>
 
@@ -4255,7 +4321,8 @@ export namespace Prisma {
   export type DebateParticipantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     debate?: boolean | DebateDefaultArgs<ExtArgs>
-    votes?: boolean | DebateParticipant$votesArgs<ExtArgs>
+    votesReceived?: boolean | DebateParticipant$votesReceivedArgs<ExtArgs>
+    votesGiven?: boolean | DebateParticipant$votesGivenArgs<ExtArgs>
     _count?: boolean | DebateParticipantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type DebateParticipantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4272,7 +4339,8 @@ export namespace Prisma {
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
       debate: Prisma.$DebatePayload<ExtArgs>
-      votes: Prisma.$VotePayload<ExtArgs>[]
+      votesReceived: Prisma.$VotePayload<ExtArgs>[]
+      votesGiven: Prisma.$VotePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -4678,7 +4746,8 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     debate<T extends DebateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DebateDefaultArgs<ExtArgs>>): Prisma__DebateClient<$Result.GetResult<Prisma.$DebatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    votes<T extends DebateParticipant$votesArgs<ExtArgs> = {}>(args?: Subset<T, DebateParticipant$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    votesReceived<T extends DebateParticipant$votesReceivedArgs<ExtArgs> = {}>(args?: Subset<T, DebateParticipant$votesReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    votesGiven<T extends DebateParticipant$votesGivenArgs<ExtArgs> = {}>(args?: Subset<T, DebateParticipant$votesGivenArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5111,9 +5180,33 @@ export namespace Prisma {
   }
 
   /**
-   * DebateParticipant.votes
+   * DebateParticipant.votesReceived
    */
-  export type DebateParticipant$votesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type DebateParticipant$votesReceivedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vote
+     */
+    select?: VoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vote
+     */
+    omit?: VoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VoteInclude<ExtArgs> | null
+    where?: VoteWhereInput
+    orderBy?: VoteOrderByWithRelationInput | VoteOrderByWithRelationInput[]
+    cursor?: VoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: VoteScalarFieldEnum | VoteScalarFieldEnum[]
+  }
+
+  /**
+   * DebateParticipant.votesGiven
+   */
+  export type DebateParticipant$votesGivenArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Vote
      */
@@ -5169,6 +5262,7 @@ export namespace Prisma {
     id: number | null
     voterId: number | null
     participantId: number | null
+    messageId: number | null
     value: number | null
   }
 
@@ -5176,6 +5270,7 @@ export namespace Prisma {
     id: number | null
     voterId: number | null
     participantId: number | null
+    messageId: number | null
     value: number | null
   }
 
@@ -5183,6 +5278,7 @@ export namespace Prisma {
     id: number | null
     voterId: number | null
     participantId: number | null
+    messageId: number | null
     value: number | null
     createdAt: Date | null
   }
@@ -5191,6 +5287,7 @@ export namespace Prisma {
     id: number | null
     voterId: number | null
     participantId: number | null
+    messageId: number | null
     value: number | null
     createdAt: Date | null
   }
@@ -5199,6 +5296,7 @@ export namespace Prisma {
     id: number
     voterId: number
     participantId: number
+    messageId: number
     value: number
     createdAt: number
     _all: number
@@ -5209,6 +5307,7 @@ export namespace Prisma {
     id?: true
     voterId?: true
     participantId?: true
+    messageId?: true
     value?: true
   }
 
@@ -5216,6 +5315,7 @@ export namespace Prisma {
     id?: true
     voterId?: true
     participantId?: true
+    messageId?: true
     value?: true
   }
 
@@ -5223,6 +5323,7 @@ export namespace Prisma {
     id?: true
     voterId?: true
     participantId?: true
+    messageId?: true
     value?: true
     createdAt?: true
   }
@@ -5231,6 +5332,7 @@ export namespace Prisma {
     id?: true
     voterId?: true
     participantId?: true
+    messageId?: true
     value?: true
     createdAt?: true
   }
@@ -5239,6 +5341,7 @@ export namespace Prisma {
     id?: true
     voterId?: true
     participantId?: true
+    messageId?: true
     value?: true
     createdAt?: true
     _all?: true
@@ -5334,6 +5437,7 @@ export namespace Prisma {
     id: number
     voterId: number
     participantId: number
+    messageId: number
     value: number
     createdAt: Date
     _count: VoteCountAggregateOutputType | null
@@ -5361,64 +5465,76 @@ export namespace Prisma {
     id?: boolean
     voterId?: boolean
     participantId?: boolean
+    messageId?: boolean
     value?: boolean
     createdAt?: boolean
-    voter?: boolean | UserDefaultArgs<ExtArgs>
+    voter?: boolean | DebateParticipantDefaultArgs<ExtArgs>
     participant?: boolean | DebateParticipantDefaultArgs<ExtArgs>
+    message?: boolean | CommentDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["vote"]>
 
   export type VoteSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     voterId?: boolean
     participantId?: boolean
+    messageId?: boolean
     value?: boolean
     createdAt?: boolean
-    voter?: boolean | UserDefaultArgs<ExtArgs>
+    voter?: boolean | DebateParticipantDefaultArgs<ExtArgs>
     participant?: boolean | DebateParticipantDefaultArgs<ExtArgs>
+    message?: boolean | CommentDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["vote"]>
 
   export type VoteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     voterId?: boolean
     participantId?: boolean
+    messageId?: boolean
     value?: boolean
     createdAt?: boolean
-    voter?: boolean | UserDefaultArgs<ExtArgs>
+    voter?: boolean | DebateParticipantDefaultArgs<ExtArgs>
     participant?: boolean | DebateParticipantDefaultArgs<ExtArgs>
+    message?: boolean | CommentDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["vote"]>
 
   export type VoteSelectScalar = {
     id?: boolean
     voterId?: boolean
     participantId?: boolean
+    messageId?: boolean
     value?: boolean
     createdAt?: boolean
   }
 
-  export type VoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "voterId" | "participantId" | "value" | "createdAt", ExtArgs["result"]["vote"]>
+  export type VoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "voterId" | "participantId" | "messageId" | "value" | "createdAt", ExtArgs["result"]["vote"]>
   export type VoteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    voter?: boolean | UserDefaultArgs<ExtArgs>
+    voter?: boolean | DebateParticipantDefaultArgs<ExtArgs>
     participant?: boolean | DebateParticipantDefaultArgs<ExtArgs>
+    message?: boolean | CommentDefaultArgs<ExtArgs>
   }
   export type VoteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    voter?: boolean | UserDefaultArgs<ExtArgs>
+    voter?: boolean | DebateParticipantDefaultArgs<ExtArgs>
     participant?: boolean | DebateParticipantDefaultArgs<ExtArgs>
+    message?: boolean | CommentDefaultArgs<ExtArgs>
   }
   export type VoteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    voter?: boolean | UserDefaultArgs<ExtArgs>
+    voter?: boolean | DebateParticipantDefaultArgs<ExtArgs>
     participant?: boolean | DebateParticipantDefaultArgs<ExtArgs>
+    message?: boolean | CommentDefaultArgs<ExtArgs>
   }
 
   export type $VotePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Vote"
     objects: {
-      voter: Prisma.$UserPayload<ExtArgs>
+      voter: Prisma.$DebateParticipantPayload<ExtArgs>
       participant: Prisma.$DebateParticipantPayload<ExtArgs>
+      message: Prisma.$CommentPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       voterId: number
       participantId: number
+      messageId: number
       value: number
       createdAt: Date
     }, ExtArgs["result"]["vote"]>
@@ -5815,8 +5931,9 @@ export namespace Prisma {
    */
   export interface Prisma__VoteClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    voter<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    voter<T extends DebateParticipantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DebateParticipantDefaultArgs<ExtArgs>>): Prisma__DebateParticipantClient<$Result.GetResult<Prisma.$DebateParticipantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     participant<T extends DebateParticipantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DebateParticipantDefaultArgs<ExtArgs>>): Prisma__DebateParticipantClient<$Result.GetResult<Prisma.$DebateParticipantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    message<T extends CommentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CommentDefaultArgs<ExtArgs>>): Prisma__CommentClient<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5849,6 +5966,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Vote", 'Int'>
     readonly voterId: FieldRef<"Vote", 'Int'>
     readonly participantId: FieldRef<"Vote", 'Int'>
+    readonly messageId: FieldRef<"Vote", 'Int'>
     readonly value: FieldRef<"Vote", 'Int'>
     readonly createdAt: FieldRef<"Vote", 'DateTime'>
   }
@@ -6493,6 +6611,8 @@ export namespace Prisma {
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     debate?: boolean | DebateDefaultArgs<ExtArgs>
+    votes?: boolean | Comment$votesArgs<ExtArgs>
+    _count?: boolean | CommentCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["comment"]>
 
   export type CommentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6533,6 +6653,8 @@ export namespace Prisma {
   export type CommentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     debate?: boolean | DebateDefaultArgs<ExtArgs>
+    votes?: boolean | Comment$votesArgs<ExtArgs>
+    _count?: boolean | CommentCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CommentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -6548,6 +6670,7 @@ export namespace Prisma {
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
       debate: Prisma.$DebatePayload<ExtArgs>
+      votes: Prisma.$VotePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -6953,6 +7076,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     debate<T extends DebateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DebateDefaultArgs<ExtArgs>>): Prisma__DebateClient<$Result.GetResult<Prisma.$DebatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    votes<T extends Comment$votesArgs<ExtArgs> = {}>(args?: Subset<T, Comment$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7382,6 +7506,30 @@ export namespace Prisma {
      * Limit how many Comments to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Comment.votes
+   */
+  export type Comment$votesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Vote
+     */
+    select?: VoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Vote
+     */
+    omit?: VoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VoteInclude<ExtArgs> | null
+    where?: VoteWhereInput
+    orderBy?: VoteOrderByWithRelationInput | VoteOrderByWithRelationInput[]
+    cursor?: VoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: VoteScalarFieldEnum | VoteScalarFieldEnum[]
   }
 
   /**
@@ -8546,6 +8694,7 @@ export namespace Prisma {
     description: 'description',
     status: 'status',
     categoryId: 'categoryId',
+    creatorId: 'creatorId',
     results: 'results',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -8571,6 +8720,7 @@ export namespace Prisma {
     id: 'id',
     voterId: 'voterId',
     participantId: 'participantId',
+    messageId: 'messageId',
     value: 'value',
     createdAt: 'createdAt'
   };
@@ -8788,7 +8938,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     debatesAsDebater?: DebateParticipantListRelationFilter
-    votes?: VoteListRelationFilter
+    debates?: DebateListRelationFilter
     comments?: CommentListRelationFilter
   }
 
@@ -8807,7 +8957,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     debatesAsDebater?: DebateParticipantOrderByRelationAggregateInput
-    votes?: VoteOrderByRelationAggregateInput
+    debates?: DebateOrderByRelationAggregateInput
     comments?: CommentOrderByRelationAggregateInput
   }
 
@@ -8829,7 +8979,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     debatesAsDebater?: DebateParticipantListRelationFilter
-    votes?: VoteListRelationFilter
+    debates?: DebateListRelationFilter
     comments?: CommentListRelationFilter
   }, "id" | "email">
 
@@ -8882,10 +9032,12 @@ export namespace Prisma {
     description?: StringNullableFilter<"Debate"> | string | null
     status?: EnumDebateStatusFilter<"Debate"> | $Enums.DebateStatus
     categoryId?: IntNullableFilter<"Debate"> | number | null
+    creatorId?: IntFilter<"Debate"> | number
     results?: JsonNullableFilter<"Debate">
     createdAt?: DateTimeFilter<"Debate"> | Date | string
     updatedAt?: DateTimeFilter<"Debate"> | Date | string
     category?: XOR<CategoryNullableScalarRelationFilter, CategoryWhereInput> | null
+    creator?: XOR<UserScalarRelationFilter, UserWhereInput>
     participants?: DebateParticipantListRelationFilter
     comments?: CommentListRelationFilter
   }
@@ -8896,10 +9048,12 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     status?: SortOrder
     categoryId?: SortOrderInput | SortOrder
+    creatorId?: SortOrder
     results?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     category?: CategoryOrderByWithRelationInput
+    creator?: UserOrderByWithRelationInput
     participants?: DebateParticipantOrderByRelationAggregateInput
     comments?: CommentOrderByRelationAggregateInput
   }
@@ -8913,10 +9067,12 @@ export namespace Prisma {
     description?: StringNullableFilter<"Debate"> | string | null
     status?: EnumDebateStatusFilter<"Debate"> | $Enums.DebateStatus
     categoryId?: IntNullableFilter<"Debate"> | number | null
+    creatorId?: IntFilter<"Debate"> | number
     results?: JsonNullableFilter<"Debate">
     createdAt?: DateTimeFilter<"Debate"> | Date | string
     updatedAt?: DateTimeFilter<"Debate"> | Date | string
     category?: XOR<CategoryNullableScalarRelationFilter, CategoryWhereInput> | null
+    creator?: XOR<UserScalarRelationFilter, UserWhereInput>
     participants?: DebateParticipantListRelationFilter
     comments?: CommentListRelationFilter
   }, "id">
@@ -8927,6 +9083,7 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     status?: SortOrder
     categoryId?: SortOrderInput | SortOrder
+    creatorId?: SortOrder
     results?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -8946,6 +9103,7 @@ export namespace Prisma {
     description?: StringNullableWithAggregatesFilter<"Debate"> | string | null
     status?: EnumDebateStatusWithAggregatesFilter<"Debate"> | $Enums.DebateStatus
     categoryId?: IntNullableWithAggregatesFilter<"Debate"> | number | null
+    creatorId?: IntWithAggregatesFilter<"Debate"> | number
     results?: JsonNullableWithAggregatesFilter<"Debate">
     createdAt?: DateTimeWithAggregatesFilter<"Debate"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Debate"> | Date | string
@@ -8964,7 +9122,8 @@ export namespace Prisma {
     hasRequestedResults?: BoolFilter<"DebateParticipant"> | boolean
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     debate?: XOR<DebateScalarRelationFilter, DebateWhereInput>
-    votes?: VoteListRelationFilter
+    votesReceived?: VoteListRelationFilter
+    votesGiven?: VoteListRelationFilter
   }
 
   export type DebateParticipantOrderByWithRelationInput = {
@@ -8977,7 +9136,8 @@ export namespace Prisma {
     hasRequestedResults?: SortOrder
     user?: UserOrderByWithRelationInput
     debate?: DebateOrderByWithRelationInput
-    votes?: VoteOrderByRelationAggregateInput
+    votesReceived?: VoteOrderByRelationAggregateInput
+    votesGiven?: VoteOrderByRelationAggregateInput
   }
 
   export type DebateParticipantWhereUniqueInput = Prisma.AtLeast<{
@@ -8994,7 +9154,8 @@ export namespace Prisma {
     hasRequestedResults?: BoolFilter<"DebateParticipant"> | boolean
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     debate?: XOR<DebateScalarRelationFilter, DebateWhereInput>
-    votes?: VoteListRelationFilter
+    votesReceived?: VoteListRelationFilter
+    votesGiven?: VoteListRelationFilter
   }, "id" | "userId_debateId">
 
   export type DebateParticipantOrderByWithAggregationInput = {
@@ -9032,40 +9193,47 @@ export namespace Prisma {
     id?: IntFilter<"Vote"> | number
     voterId?: IntFilter<"Vote"> | number
     participantId?: IntFilter<"Vote"> | number
+    messageId?: IntFilter<"Vote"> | number
     value?: IntFilter<"Vote"> | number
     createdAt?: DateTimeFilter<"Vote"> | Date | string
-    voter?: XOR<UserScalarRelationFilter, UserWhereInput>
+    voter?: XOR<DebateParticipantScalarRelationFilter, DebateParticipantWhereInput>
     participant?: XOR<DebateParticipantScalarRelationFilter, DebateParticipantWhereInput>
+    message?: XOR<CommentScalarRelationFilter, CommentWhereInput>
   }
 
   export type VoteOrderByWithRelationInput = {
     id?: SortOrder
     voterId?: SortOrder
     participantId?: SortOrder
+    messageId?: SortOrder
     value?: SortOrder
     createdAt?: SortOrder
-    voter?: UserOrderByWithRelationInput
+    voter?: DebateParticipantOrderByWithRelationInput
     participant?: DebateParticipantOrderByWithRelationInput
+    message?: CommentOrderByWithRelationInput
   }
 
   export type VoteWhereUniqueInput = Prisma.AtLeast<{
     id?: number
-    voterId_participantId?: VoteVoterIdParticipantIdCompoundUniqueInput
+    voterId_participantId_messageId?: VoteVoterIdParticipantIdMessageIdCompoundUniqueInput
     AND?: VoteWhereInput | VoteWhereInput[]
     OR?: VoteWhereInput[]
     NOT?: VoteWhereInput | VoteWhereInput[]
     voterId?: IntFilter<"Vote"> | number
     participantId?: IntFilter<"Vote"> | number
+    messageId?: IntFilter<"Vote"> | number
     value?: IntFilter<"Vote"> | number
     createdAt?: DateTimeFilter<"Vote"> | Date | string
-    voter?: XOR<UserScalarRelationFilter, UserWhereInput>
+    voter?: XOR<DebateParticipantScalarRelationFilter, DebateParticipantWhereInput>
     participant?: XOR<DebateParticipantScalarRelationFilter, DebateParticipantWhereInput>
-  }, "id" | "voterId_participantId">
+    message?: XOR<CommentScalarRelationFilter, CommentWhereInput>
+  }, "id" | "voterId_participantId_messageId">
 
   export type VoteOrderByWithAggregationInput = {
     id?: SortOrder
     voterId?: SortOrder
     participantId?: SortOrder
+    messageId?: SortOrder
     value?: SortOrder
     createdAt?: SortOrder
     _count?: VoteCountOrderByAggregateInput
@@ -9082,6 +9250,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Vote"> | number
     voterId?: IntWithAggregatesFilter<"Vote"> | number
     participantId?: IntWithAggregatesFilter<"Vote"> | number
+    messageId?: IntWithAggregatesFilter<"Vote"> | number
     value?: IntWithAggregatesFilter<"Vote"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Vote"> | Date | string
   }
@@ -9099,6 +9268,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Comment"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     debate?: XOR<DebateScalarRelationFilter, DebateWhereInput>
+    votes?: VoteListRelationFilter
   }
 
   export type CommentOrderByWithRelationInput = {
@@ -9111,6 +9281,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
     debate?: DebateOrderByWithRelationInput
+    votes?: VoteOrderByRelationAggregateInput
   }
 
   export type CommentWhereUniqueInput = Prisma.AtLeast<{
@@ -9126,6 +9297,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Comment"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     debate?: XOR<DebateScalarRelationFilter, DebateWhereInput>
+    votes?: VoteListRelationFilter
   }, "id">
 
   export type CommentOrderByWithAggregationInput = {
@@ -9227,7 +9399,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     debatesAsDebater?: DebateParticipantCreateNestedManyWithoutUserInput
-    votes?: VoteCreateNestedManyWithoutVoterInput
+    debates?: DebateCreateNestedManyWithoutCreatorInput
     comments?: CommentCreateNestedManyWithoutUserInput
   }
 
@@ -9246,7 +9418,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     debatesAsDebater?: DebateParticipantUncheckedCreateNestedManyWithoutUserInput
-    votes?: VoteUncheckedCreateNestedManyWithoutVoterInput
+    debates?: DebateUncheckedCreateNestedManyWithoutCreatorInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -9264,7 +9436,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     debatesAsDebater?: DebateParticipantUpdateManyWithoutUserNestedInput
-    votes?: VoteUpdateManyWithoutVoterNestedInput
+    debates?: DebateUpdateManyWithoutCreatorNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
   }
 
@@ -9283,7 +9455,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     debatesAsDebater?: DebateParticipantUncheckedUpdateManyWithoutUserNestedInput
-    votes?: VoteUncheckedUpdateManyWithoutVoterNestedInput
+    debates?: DebateUncheckedUpdateManyWithoutCreatorNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -9342,6 +9514,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutDebatesInput
+    creator: UserCreateNestedOneWithoutDebatesInput
     participants?: DebateParticipantCreateNestedManyWithoutDebateInput
     comments?: CommentCreateNestedManyWithoutDebateInput
   }
@@ -9352,6 +9525,7 @@ export namespace Prisma {
     description?: string | null
     status?: $Enums.DebateStatus
     categoryId?: number | null
+    creatorId: number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -9367,6 +9541,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutDebatesNestedInput
+    creator?: UserUpdateOneRequiredWithoutDebatesNestedInput
     participants?: DebateParticipantUpdateManyWithoutDebateNestedInput
     comments?: CommentUpdateManyWithoutDebateNestedInput
   }
@@ -9377,6 +9552,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
     categoryId?: NullableIntFieldUpdateOperationsInput | number | null
+    creatorId?: IntFieldUpdateOperationsInput | number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9390,6 +9566,7 @@ export namespace Prisma {
     description?: string | null
     status?: $Enums.DebateStatus
     categoryId?: number | null
+    creatorId: number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -9410,6 +9587,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
     categoryId?: NullableIntFieldUpdateOperationsInput | number | null
+    creatorId?: IntFieldUpdateOperationsInput | number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9422,7 +9600,8 @@ export namespace Prisma {
     hasRequestedResults?: boolean
     user: UserCreateNestedOneWithoutDebatesAsDebaterInput
     debate: DebateCreateNestedOneWithoutParticipantsInput
-    votes?: VoteCreateNestedManyWithoutParticipantInput
+    votesReceived?: VoteCreateNestedManyWithoutParticipantInput
+    votesGiven?: VoteCreateNestedManyWithoutVoterInput
   }
 
   export type DebateParticipantUncheckedCreateInput = {
@@ -9433,7 +9612,8 @@ export namespace Prisma {
     position?: string | null
     joinedAt?: Date | string
     hasRequestedResults?: boolean
-    votes?: VoteUncheckedCreateNestedManyWithoutParticipantInput
+    votesReceived?: VoteUncheckedCreateNestedManyWithoutParticipantInput
+    votesGiven?: VoteUncheckedCreateNestedManyWithoutVoterInput
   }
 
   export type DebateParticipantUpdateInput = {
@@ -9443,7 +9623,8 @@ export namespace Prisma {
     hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
     user?: UserUpdateOneRequiredWithoutDebatesAsDebaterNestedInput
     debate?: DebateUpdateOneRequiredWithoutParticipantsNestedInput
-    votes?: VoteUpdateManyWithoutParticipantNestedInput
+    votesReceived?: VoteUpdateManyWithoutParticipantNestedInput
+    votesGiven?: VoteUpdateManyWithoutVoterNestedInput
   }
 
   export type DebateParticipantUncheckedUpdateInput = {
@@ -9454,7 +9635,8 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
-    votes?: VoteUncheckedUpdateManyWithoutParticipantNestedInput
+    votesReceived?: VoteUncheckedUpdateManyWithoutParticipantNestedInput
+    votesGiven?: VoteUncheckedUpdateManyWithoutVoterNestedInput
   }
 
   export type DebateParticipantCreateManyInput = {
@@ -9487,14 +9669,16 @@ export namespace Prisma {
   export type VoteCreateInput = {
     value: number
     createdAt?: Date | string
-    voter: UserCreateNestedOneWithoutVotesInput
-    participant: DebateParticipantCreateNestedOneWithoutVotesInput
+    voter: DebateParticipantCreateNestedOneWithoutVotesGivenInput
+    participant: DebateParticipantCreateNestedOneWithoutVotesReceivedInput
+    message: CommentCreateNestedOneWithoutVotesInput
   }
 
   export type VoteUncheckedCreateInput = {
     id?: number
     voterId: number
     participantId: number
+    messageId: number
     value: number
     createdAt?: Date | string
   }
@@ -9502,14 +9686,16 @@ export namespace Prisma {
   export type VoteUpdateInput = {
     value?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    voter?: UserUpdateOneRequiredWithoutVotesNestedInput
-    participant?: DebateParticipantUpdateOneRequiredWithoutVotesNestedInput
+    voter?: DebateParticipantUpdateOneRequiredWithoutVotesGivenNestedInput
+    participant?: DebateParticipantUpdateOneRequiredWithoutVotesReceivedNestedInput
+    message?: CommentUpdateOneRequiredWithoutVotesNestedInput
   }
 
   export type VoteUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     voterId?: IntFieldUpdateOperationsInput | number
     participantId?: IntFieldUpdateOperationsInput | number
+    messageId?: IntFieldUpdateOperationsInput | number
     value?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9518,6 +9704,7 @@ export namespace Prisma {
     id?: number
     voterId: number
     participantId: number
+    messageId: number
     value: number
     createdAt?: Date | string
   }
@@ -9531,6 +9718,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     voterId?: IntFieldUpdateOperationsInput | number
     participantId?: IntFieldUpdateOperationsInput | number
+    messageId?: IntFieldUpdateOperationsInput | number
     value?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9542,6 +9730,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutCommentsInput
     debate: DebateCreateNestedOneWithoutCommentsInput
+    votes?: VoteCreateNestedManyWithoutMessageInput
   }
 
   export type CommentUncheckedCreateInput = {
@@ -9552,6 +9741,7 @@ export namespace Prisma {
     parentId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    votes?: VoteUncheckedCreateNestedManyWithoutMessageInput
   }
 
   export type CommentUpdateInput = {
@@ -9561,6 +9751,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutCommentsNestedInput
     debate?: DebateUpdateOneRequiredWithoutCommentsNestedInput
+    votes?: VoteUpdateManyWithoutMessageNestedInput
   }
 
   export type CommentUncheckedUpdateInput = {
@@ -9571,6 +9762,7 @@ export namespace Prisma {
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    votes?: VoteUncheckedUpdateManyWithoutMessageNestedInput
   }
 
   export type CommentCreateManyInput = {
@@ -9723,10 +9915,10 @@ export namespace Prisma {
     none?: DebateParticipantWhereInput
   }
 
-  export type VoteListRelationFilter = {
-    every?: VoteWhereInput
-    some?: VoteWhereInput
-    none?: VoteWhereInput
+  export type DebateListRelationFilter = {
+    every?: DebateWhereInput
+    some?: DebateWhereInput
+    none?: DebateWhereInput
   }
 
   export type CommentListRelationFilter = {
@@ -9744,7 +9936,7 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type VoteOrderByRelationAggregateInput = {
+  export type DebateOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -9949,12 +10141,18 @@ export namespace Prisma {
     isNot?: CategoryWhereInput | null
   }
 
+  export type UserScalarRelationFilter = {
+    is?: UserWhereInput
+    isNot?: UserWhereInput
+  }
+
   export type DebateCountOrderByAggregateInput = {
     id?: SortOrder
     topic?: SortOrder
     description?: SortOrder
     status?: SortOrder
     categoryId?: SortOrder
+    creatorId?: SortOrder
     results?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -9963,6 +10161,7 @@ export namespace Prisma {
   export type DebateAvgOrderByAggregateInput = {
     id?: SortOrder
     categoryId?: SortOrder
+    creatorId?: SortOrder
   }
 
   export type DebateMaxOrderByAggregateInput = {
@@ -9971,6 +10170,7 @@ export namespace Prisma {
     description?: SortOrder
     status?: SortOrder
     categoryId?: SortOrder
+    creatorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -9981,6 +10181,7 @@ export namespace Prisma {
     description?: SortOrder
     status?: SortOrder
     categoryId?: SortOrder
+    creatorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -9988,6 +10189,7 @@ export namespace Prisma {
   export type DebateSumOrderByAggregateInput = {
     id?: SortOrder
     categoryId?: SortOrder
+    creatorId?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -10067,14 +10269,19 @@ export namespace Prisma {
     not?: NestedEnumParticipantRoleFilter<$PrismaModel> | $Enums.ParticipantRole
   }
 
-  export type UserScalarRelationFilter = {
-    is?: UserWhereInput
-    isNot?: UserWhereInput
-  }
-
   export type DebateScalarRelationFilter = {
     is?: DebateWhereInput
     isNot?: DebateWhereInput
+  }
+
+  export type VoteListRelationFilter = {
+    every?: VoteWhereInput
+    some?: VoteWhereInput
+    none?: VoteWhereInput
+  }
+
+  export type VoteOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type DebateParticipantUserIdDebateIdCompoundUniqueInput = {
@@ -10139,15 +10346,22 @@ export namespace Prisma {
     isNot?: DebateParticipantWhereInput
   }
 
-  export type VoteVoterIdParticipantIdCompoundUniqueInput = {
+  export type CommentScalarRelationFilter = {
+    is?: CommentWhereInput
+    isNot?: CommentWhereInput
+  }
+
+  export type VoteVoterIdParticipantIdMessageIdCompoundUniqueInput = {
     voterId: number
     participantId: number
+    messageId: number
   }
 
   export type VoteCountOrderByAggregateInput = {
     id?: SortOrder
     voterId?: SortOrder
     participantId?: SortOrder
+    messageId?: SortOrder
     value?: SortOrder
     createdAt?: SortOrder
   }
@@ -10156,6 +10370,7 @@ export namespace Prisma {
     id?: SortOrder
     voterId?: SortOrder
     participantId?: SortOrder
+    messageId?: SortOrder
     value?: SortOrder
   }
 
@@ -10163,6 +10378,7 @@ export namespace Prisma {
     id?: SortOrder
     voterId?: SortOrder
     participantId?: SortOrder
+    messageId?: SortOrder
     value?: SortOrder
     createdAt?: SortOrder
   }
@@ -10171,6 +10387,7 @@ export namespace Prisma {
     id?: SortOrder
     voterId?: SortOrder
     participantId?: SortOrder
+    messageId?: SortOrder
     value?: SortOrder
     createdAt?: SortOrder
   }
@@ -10179,6 +10396,7 @@ export namespace Prisma {
     id?: SortOrder
     voterId?: SortOrder
     participantId?: SortOrder
+    messageId?: SortOrder
     value?: SortOrder
   }
 
@@ -10226,16 +10444,6 @@ export namespace Prisma {
     parentId?: SortOrder
   }
 
-  export type DebateListRelationFilter = {
-    every?: DebateWhereInput
-    some?: DebateWhereInput
-    none?: DebateWhereInput
-  }
-
-  export type DebateOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
   export type CategoryCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -10275,11 +10483,11 @@ export namespace Prisma {
     connect?: DebateParticipantWhereUniqueInput | DebateParticipantWhereUniqueInput[]
   }
 
-  export type VoteCreateNestedManyWithoutVoterInput = {
-    create?: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput> | VoteCreateWithoutVoterInput[] | VoteUncheckedCreateWithoutVoterInput[]
-    connectOrCreate?: VoteCreateOrConnectWithoutVoterInput | VoteCreateOrConnectWithoutVoterInput[]
-    createMany?: VoteCreateManyVoterInputEnvelope
-    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+  export type DebateCreateNestedManyWithoutCreatorInput = {
+    create?: XOR<DebateCreateWithoutCreatorInput, DebateUncheckedCreateWithoutCreatorInput> | DebateCreateWithoutCreatorInput[] | DebateUncheckedCreateWithoutCreatorInput[]
+    connectOrCreate?: DebateCreateOrConnectWithoutCreatorInput | DebateCreateOrConnectWithoutCreatorInput[]
+    createMany?: DebateCreateManyCreatorInputEnvelope
+    connect?: DebateWhereUniqueInput | DebateWhereUniqueInput[]
   }
 
   export type CommentCreateNestedManyWithoutUserInput = {
@@ -10296,11 +10504,11 @@ export namespace Prisma {
     connect?: DebateParticipantWhereUniqueInput | DebateParticipantWhereUniqueInput[]
   }
 
-  export type VoteUncheckedCreateNestedManyWithoutVoterInput = {
-    create?: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput> | VoteCreateWithoutVoterInput[] | VoteUncheckedCreateWithoutVoterInput[]
-    connectOrCreate?: VoteCreateOrConnectWithoutVoterInput | VoteCreateOrConnectWithoutVoterInput[]
-    createMany?: VoteCreateManyVoterInputEnvelope
-    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+  export type DebateUncheckedCreateNestedManyWithoutCreatorInput = {
+    create?: XOR<DebateCreateWithoutCreatorInput, DebateUncheckedCreateWithoutCreatorInput> | DebateCreateWithoutCreatorInput[] | DebateUncheckedCreateWithoutCreatorInput[]
+    connectOrCreate?: DebateCreateOrConnectWithoutCreatorInput | DebateCreateOrConnectWithoutCreatorInput[]
+    createMany?: DebateCreateManyCreatorInputEnvelope
+    connect?: DebateWhereUniqueInput | DebateWhereUniqueInput[]
   }
 
   export type CommentUncheckedCreateNestedManyWithoutUserInput = {
@@ -10344,18 +10552,18 @@ export namespace Prisma {
     deleteMany?: DebateParticipantScalarWhereInput | DebateParticipantScalarWhereInput[]
   }
 
-  export type VoteUpdateManyWithoutVoterNestedInput = {
-    create?: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput> | VoteCreateWithoutVoterInput[] | VoteUncheckedCreateWithoutVoterInput[]
-    connectOrCreate?: VoteCreateOrConnectWithoutVoterInput | VoteCreateOrConnectWithoutVoterInput[]
-    upsert?: VoteUpsertWithWhereUniqueWithoutVoterInput | VoteUpsertWithWhereUniqueWithoutVoterInput[]
-    createMany?: VoteCreateManyVoterInputEnvelope
-    set?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
-    disconnect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
-    delete?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
-    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
-    update?: VoteUpdateWithWhereUniqueWithoutVoterInput | VoteUpdateWithWhereUniqueWithoutVoterInput[]
-    updateMany?: VoteUpdateManyWithWhereWithoutVoterInput | VoteUpdateManyWithWhereWithoutVoterInput[]
-    deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
+  export type DebateUpdateManyWithoutCreatorNestedInput = {
+    create?: XOR<DebateCreateWithoutCreatorInput, DebateUncheckedCreateWithoutCreatorInput> | DebateCreateWithoutCreatorInput[] | DebateUncheckedCreateWithoutCreatorInput[]
+    connectOrCreate?: DebateCreateOrConnectWithoutCreatorInput | DebateCreateOrConnectWithoutCreatorInput[]
+    upsert?: DebateUpsertWithWhereUniqueWithoutCreatorInput | DebateUpsertWithWhereUniqueWithoutCreatorInput[]
+    createMany?: DebateCreateManyCreatorInputEnvelope
+    set?: DebateWhereUniqueInput | DebateWhereUniqueInput[]
+    disconnect?: DebateWhereUniqueInput | DebateWhereUniqueInput[]
+    delete?: DebateWhereUniqueInput | DebateWhereUniqueInput[]
+    connect?: DebateWhereUniqueInput | DebateWhereUniqueInput[]
+    update?: DebateUpdateWithWhereUniqueWithoutCreatorInput | DebateUpdateWithWhereUniqueWithoutCreatorInput[]
+    updateMany?: DebateUpdateManyWithWhereWithoutCreatorInput | DebateUpdateManyWithWhereWithoutCreatorInput[]
+    deleteMany?: DebateScalarWhereInput | DebateScalarWhereInput[]
   }
 
   export type CommentUpdateManyWithoutUserNestedInput = {
@@ -10394,18 +10602,18 @@ export namespace Prisma {
     deleteMany?: DebateParticipantScalarWhereInput | DebateParticipantScalarWhereInput[]
   }
 
-  export type VoteUncheckedUpdateManyWithoutVoterNestedInput = {
-    create?: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput> | VoteCreateWithoutVoterInput[] | VoteUncheckedCreateWithoutVoterInput[]
-    connectOrCreate?: VoteCreateOrConnectWithoutVoterInput | VoteCreateOrConnectWithoutVoterInput[]
-    upsert?: VoteUpsertWithWhereUniqueWithoutVoterInput | VoteUpsertWithWhereUniqueWithoutVoterInput[]
-    createMany?: VoteCreateManyVoterInputEnvelope
-    set?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
-    disconnect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
-    delete?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
-    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
-    update?: VoteUpdateWithWhereUniqueWithoutVoterInput | VoteUpdateWithWhereUniqueWithoutVoterInput[]
-    updateMany?: VoteUpdateManyWithWhereWithoutVoterInput | VoteUpdateManyWithWhereWithoutVoterInput[]
-    deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
+  export type DebateUncheckedUpdateManyWithoutCreatorNestedInput = {
+    create?: XOR<DebateCreateWithoutCreatorInput, DebateUncheckedCreateWithoutCreatorInput> | DebateCreateWithoutCreatorInput[] | DebateUncheckedCreateWithoutCreatorInput[]
+    connectOrCreate?: DebateCreateOrConnectWithoutCreatorInput | DebateCreateOrConnectWithoutCreatorInput[]
+    upsert?: DebateUpsertWithWhereUniqueWithoutCreatorInput | DebateUpsertWithWhereUniqueWithoutCreatorInput[]
+    createMany?: DebateCreateManyCreatorInputEnvelope
+    set?: DebateWhereUniqueInput | DebateWhereUniqueInput[]
+    disconnect?: DebateWhereUniqueInput | DebateWhereUniqueInput[]
+    delete?: DebateWhereUniqueInput | DebateWhereUniqueInput[]
+    connect?: DebateWhereUniqueInput | DebateWhereUniqueInput[]
+    update?: DebateUpdateWithWhereUniqueWithoutCreatorInput | DebateUpdateWithWhereUniqueWithoutCreatorInput[]
+    updateMany?: DebateUpdateManyWithWhereWithoutCreatorInput | DebateUpdateManyWithWhereWithoutCreatorInput[]
+    deleteMany?: DebateScalarWhereInput | DebateScalarWhereInput[]
   }
 
   export type CommentUncheckedUpdateManyWithoutUserNestedInput = {
@@ -10426,6 +10634,12 @@ export namespace Prisma {
     create?: XOR<CategoryCreateWithoutDebatesInput, CategoryUncheckedCreateWithoutDebatesInput>
     connectOrCreate?: CategoryCreateOrConnectWithoutDebatesInput
     connect?: CategoryWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutDebatesInput = {
+    create?: XOR<UserCreateWithoutDebatesInput, UserUncheckedCreateWithoutDebatesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDebatesInput
+    connect?: UserWhereUniqueInput
   }
 
   export type DebateParticipantCreateNestedManyWithoutDebateInput = {
@@ -10472,6 +10686,14 @@ export namespace Prisma {
     delete?: CategoryWhereInput | boolean
     connect?: CategoryWhereUniqueInput
     update?: XOR<XOR<CategoryUpdateToOneWithWhereWithoutDebatesInput, CategoryUpdateWithoutDebatesInput>, CategoryUncheckedUpdateWithoutDebatesInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutDebatesNestedInput = {
+    create?: XOR<UserCreateWithoutDebatesInput, UserUncheckedCreateWithoutDebatesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDebatesInput
+    upsert?: UserUpsertWithoutDebatesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDebatesInput, UserUpdateWithoutDebatesInput>, UserUncheckedUpdateWithoutDebatesInput>
   }
 
   export type DebateParticipantUpdateManyWithoutDebateNestedInput = {
@@ -10557,10 +10779,24 @@ export namespace Prisma {
     connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
   }
 
+  export type VoteCreateNestedManyWithoutVoterInput = {
+    create?: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput> | VoteCreateWithoutVoterInput[] | VoteUncheckedCreateWithoutVoterInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutVoterInput | VoteCreateOrConnectWithoutVoterInput[]
+    createMany?: VoteCreateManyVoterInputEnvelope
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+  }
+
   export type VoteUncheckedCreateNestedManyWithoutParticipantInput = {
     create?: XOR<VoteCreateWithoutParticipantInput, VoteUncheckedCreateWithoutParticipantInput> | VoteCreateWithoutParticipantInput[] | VoteUncheckedCreateWithoutParticipantInput[]
     connectOrCreate?: VoteCreateOrConnectWithoutParticipantInput | VoteCreateOrConnectWithoutParticipantInput[]
     createMany?: VoteCreateManyParticipantInputEnvelope
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+  }
+
+  export type VoteUncheckedCreateNestedManyWithoutVoterInput = {
+    create?: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput> | VoteCreateWithoutVoterInput[] | VoteUncheckedCreateWithoutVoterInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutVoterInput | VoteCreateOrConnectWithoutVoterInput[]
+    createMany?: VoteCreateManyVoterInputEnvelope
     connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
   }
 
@@ -10598,6 +10834,20 @@ export namespace Prisma {
     deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
   }
 
+  export type VoteUpdateManyWithoutVoterNestedInput = {
+    create?: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput> | VoteCreateWithoutVoterInput[] | VoteUncheckedCreateWithoutVoterInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutVoterInput | VoteCreateOrConnectWithoutVoterInput[]
+    upsert?: VoteUpsertWithWhereUniqueWithoutVoterInput | VoteUpsertWithWhereUniqueWithoutVoterInput[]
+    createMany?: VoteCreateManyVoterInputEnvelope
+    set?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    disconnect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    delete?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    update?: VoteUpdateWithWhereUniqueWithoutVoterInput | VoteUpdateWithWhereUniqueWithoutVoterInput[]
+    updateMany?: VoteUpdateManyWithWhereWithoutVoterInput | VoteUpdateManyWithWhereWithoutVoterInput[]
+    deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
+  }
+
   export type VoteUncheckedUpdateManyWithoutParticipantNestedInput = {
     create?: XOR<VoteCreateWithoutParticipantInput, VoteUncheckedCreateWithoutParticipantInput> | VoteCreateWithoutParticipantInput[] | VoteUncheckedCreateWithoutParticipantInput[]
     connectOrCreate?: VoteCreateOrConnectWithoutParticipantInput | VoteCreateOrConnectWithoutParticipantInput[]
@@ -10612,32 +10862,60 @@ export namespace Prisma {
     deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
   }
 
-  export type UserCreateNestedOneWithoutVotesInput = {
-    create?: XOR<UserCreateWithoutVotesInput, UserUncheckedCreateWithoutVotesInput>
-    connectOrCreate?: UserCreateOrConnectWithoutVotesInput
-    connect?: UserWhereUniqueInput
+  export type VoteUncheckedUpdateManyWithoutVoterNestedInput = {
+    create?: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput> | VoteCreateWithoutVoterInput[] | VoteUncheckedCreateWithoutVoterInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutVoterInput | VoteCreateOrConnectWithoutVoterInput[]
+    upsert?: VoteUpsertWithWhereUniqueWithoutVoterInput | VoteUpsertWithWhereUniqueWithoutVoterInput[]
+    createMany?: VoteCreateManyVoterInputEnvelope
+    set?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    disconnect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    delete?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    update?: VoteUpdateWithWhereUniqueWithoutVoterInput | VoteUpdateWithWhereUniqueWithoutVoterInput[]
+    updateMany?: VoteUpdateManyWithWhereWithoutVoterInput | VoteUpdateManyWithWhereWithoutVoterInput[]
+    deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
   }
 
-  export type DebateParticipantCreateNestedOneWithoutVotesInput = {
-    create?: XOR<DebateParticipantCreateWithoutVotesInput, DebateParticipantUncheckedCreateWithoutVotesInput>
-    connectOrCreate?: DebateParticipantCreateOrConnectWithoutVotesInput
+  export type DebateParticipantCreateNestedOneWithoutVotesGivenInput = {
+    create?: XOR<DebateParticipantCreateWithoutVotesGivenInput, DebateParticipantUncheckedCreateWithoutVotesGivenInput>
+    connectOrCreate?: DebateParticipantCreateOrConnectWithoutVotesGivenInput
     connect?: DebateParticipantWhereUniqueInput
   }
 
-  export type UserUpdateOneRequiredWithoutVotesNestedInput = {
-    create?: XOR<UserCreateWithoutVotesInput, UserUncheckedCreateWithoutVotesInput>
-    connectOrCreate?: UserCreateOrConnectWithoutVotesInput
-    upsert?: UserUpsertWithoutVotesInput
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutVotesInput, UserUpdateWithoutVotesInput>, UserUncheckedUpdateWithoutVotesInput>
+  export type DebateParticipantCreateNestedOneWithoutVotesReceivedInput = {
+    create?: XOR<DebateParticipantCreateWithoutVotesReceivedInput, DebateParticipantUncheckedCreateWithoutVotesReceivedInput>
+    connectOrCreate?: DebateParticipantCreateOrConnectWithoutVotesReceivedInput
+    connect?: DebateParticipantWhereUniqueInput
   }
 
-  export type DebateParticipantUpdateOneRequiredWithoutVotesNestedInput = {
-    create?: XOR<DebateParticipantCreateWithoutVotesInput, DebateParticipantUncheckedCreateWithoutVotesInput>
-    connectOrCreate?: DebateParticipantCreateOrConnectWithoutVotesInput
-    upsert?: DebateParticipantUpsertWithoutVotesInput
+  export type CommentCreateNestedOneWithoutVotesInput = {
+    create?: XOR<CommentCreateWithoutVotesInput, CommentUncheckedCreateWithoutVotesInput>
+    connectOrCreate?: CommentCreateOrConnectWithoutVotesInput
+    connect?: CommentWhereUniqueInput
+  }
+
+  export type DebateParticipantUpdateOneRequiredWithoutVotesGivenNestedInput = {
+    create?: XOR<DebateParticipantCreateWithoutVotesGivenInput, DebateParticipantUncheckedCreateWithoutVotesGivenInput>
+    connectOrCreate?: DebateParticipantCreateOrConnectWithoutVotesGivenInput
+    upsert?: DebateParticipantUpsertWithoutVotesGivenInput
     connect?: DebateParticipantWhereUniqueInput
-    update?: XOR<XOR<DebateParticipantUpdateToOneWithWhereWithoutVotesInput, DebateParticipantUpdateWithoutVotesInput>, DebateParticipantUncheckedUpdateWithoutVotesInput>
+    update?: XOR<XOR<DebateParticipantUpdateToOneWithWhereWithoutVotesGivenInput, DebateParticipantUpdateWithoutVotesGivenInput>, DebateParticipantUncheckedUpdateWithoutVotesGivenInput>
+  }
+
+  export type DebateParticipantUpdateOneRequiredWithoutVotesReceivedNestedInput = {
+    create?: XOR<DebateParticipantCreateWithoutVotesReceivedInput, DebateParticipantUncheckedCreateWithoutVotesReceivedInput>
+    connectOrCreate?: DebateParticipantCreateOrConnectWithoutVotesReceivedInput
+    upsert?: DebateParticipantUpsertWithoutVotesReceivedInput
+    connect?: DebateParticipantWhereUniqueInput
+    update?: XOR<XOR<DebateParticipantUpdateToOneWithWhereWithoutVotesReceivedInput, DebateParticipantUpdateWithoutVotesReceivedInput>, DebateParticipantUncheckedUpdateWithoutVotesReceivedInput>
+  }
+
+  export type CommentUpdateOneRequiredWithoutVotesNestedInput = {
+    create?: XOR<CommentCreateWithoutVotesInput, CommentUncheckedCreateWithoutVotesInput>
+    connectOrCreate?: CommentCreateOrConnectWithoutVotesInput
+    upsert?: CommentUpsertWithoutVotesInput
+    connect?: CommentWhereUniqueInput
+    update?: XOR<XOR<CommentUpdateToOneWithWhereWithoutVotesInput, CommentUpdateWithoutVotesInput>, CommentUncheckedUpdateWithoutVotesInput>
   }
 
   export type UserCreateNestedOneWithoutCommentsInput = {
@@ -10650,6 +10928,20 @@ export namespace Prisma {
     create?: XOR<DebateCreateWithoutCommentsInput, DebateUncheckedCreateWithoutCommentsInput>
     connectOrCreate?: DebateCreateOrConnectWithoutCommentsInput
     connect?: DebateWhereUniqueInput
+  }
+
+  export type VoteCreateNestedManyWithoutMessageInput = {
+    create?: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput> | VoteCreateWithoutMessageInput[] | VoteUncheckedCreateWithoutMessageInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutMessageInput | VoteCreateOrConnectWithoutMessageInput[]
+    createMany?: VoteCreateManyMessageInputEnvelope
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+  }
+
+  export type VoteUncheckedCreateNestedManyWithoutMessageInput = {
+    create?: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput> | VoteCreateWithoutMessageInput[] | VoteUncheckedCreateWithoutMessageInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutMessageInput | VoteCreateOrConnectWithoutMessageInput[]
+    createMany?: VoteCreateManyMessageInputEnvelope
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
   }
 
   export type UserUpdateOneRequiredWithoutCommentsNestedInput = {
@@ -10666,6 +10958,34 @@ export namespace Prisma {
     upsert?: DebateUpsertWithoutCommentsInput
     connect?: DebateWhereUniqueInput
     update?: XOR<XOR<DebateUpdateToOneWithWhereWithoutCommentsInput, DebateUpdateWithoutCommentsInput>, DebateUncheckedUpdateWithoutCommentsInput>
+  }
+
+  export type VoteUpdateManyWithoutMessageNestedInput = {
+    create?: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput> | VoteCreateWithoutMessageInput[] | VoteUncheckedCreateWithoutMessageInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutMessageInput | VoteCreateOrConnectWithoutMessageInput[]
+    upsert?: VoteUpsertWithWhereUniqueWithoutMessageInput | VoteUpsertWithWhereUniqueWithoutMessageInput[]
+    createMany?: VoteCreateManyMessageInputEnvelope
+    set?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    disconnect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    delete?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    update?: VoteUpdateWithWhereUniqueWithoutMessageInput | VoteUpdateWithWhereUniqueWithoutMessageInput[]
+    updateMany?: VoteUpdateManyWithWhereWithoutMessageInput | VoteUpdateManyWithWhereWithoutMessageInput[]
+    deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
+  }
+
+  export type VoteUncheckedUpdateManyWithoutMessageNestedInput = {
+    create?: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput> | VoteCreateWithoutMessageInput[] | VoteUncheckedCreateWithoutMessageInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutMessageInput | VoteCreateOrConnectWithoutMessageInput[]
+    upsert?: VoteUpsertWithWhereUniqueWithoutMessageInput | VoteUpsertWithWhereUniqueWithoutMessageInput[]
+    createMany?: VoteCreateManyMessageInputEnvelope
+    set?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    disconnect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    delete?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    update?: VoteUpdateWithWhereUniqueWithoutMessageInput | VoteUpdateWithWhereUniqueWithoutMessageInput[]
+    updateMany?: VoteUpdateManyWithWhereWithoutMessageInput | VoteUpdateManyWithWhereWithoutMessageInput[]
+    deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
   }
 
   export type DebateCreateNestedManyWithoutCategoryInput = {
@@ -10991,7 +11311,8 @@ export namespace Prisma {
     joinedAt?: Date | string
     hasRequestedResults?: boolean
     debate: DebateCreateNestedOneWithoutParticipantsInput
-    votes?: VoteCreateNestedManyWithoutParticipantInput
+    votesReceived?: VoteCreateNestedManyWithoutParticipantInput
+    votesGiven?: VoteCreateNestedManyWithoutVoterInput
   }
 
   export type DebateParticipantUncheckedCreateWithoutUserInput = {
@@ -11001,7 +11322,8 @@ export namespace Prisma {
     position?: string | null
     joinedAt?: Date | string
     hasRequestedResults?: boolean
-    votes?: VoteUncheckedCreateNestedManyWithoutParticipantInput
+    votesReceived?: VoteUncheckedCreateNestedManyWithoutParticipantInput
+    votesGiven?: VoteUncheckedCreateNestedManyWithoutVoterInput
   }
 
   export type DebateParticipantCreateOrConnectWithoutUserInput = {
@@ -11014,26 +11336,38 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type VoteCreateWithoutVoterInput = {
-    value: number
+  export type DebateCreateWithoutCreatorInput = {
+    topic: string
+    description?: string | null
+    status?: $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
-    participant: DebateParticipantCreateNestedOneWithoutVotesInput
+    updatedAt?: Date | string
+    category?: CategoryCreateNestedOneWithoutDebatesInput
+    participants?: DebateParticipantCreateNestedManyWithoutDebateInput
+    comments?: CommentCreateNestedManyWithoutDebateInput
   }
 
-  export type VoteUncheckedCreateWithoutVoterInput = {
+  export type DebateUncheckedCreateWithoutCreatorInput = {
     id?: number
-    participantId: number
-    value: number
+    topic: string
+    description?: string | null
+    status?: $Enums.DebateStatus
+    categoryId?: number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
+    updatedAt?: Date | string
+    participants?: DebateParticipantUncheckedCreateNestedManyWithoutDebateInput
+    comments?: CommentUncheckedCreateNestedManyWithoutDebateInput
   }
 
-  export type VoteCreateOrConnectWithoutVoterInput = {
-    where: VoteWhereUniqueInput
-    create: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput>
+  export type DebateCreateOrConnectWithoutCreatorInput = {
+    where: DebateWhereUniqueInput
+    create: XOR<DebateCreateWithoutCreatorInput, DebateUncheckedCreateWithoutCreatorInput>
   }
 
-  export type VoteCreateManyVoterInputEnvelope = {
-    data: VoteCreateManyVoterInput | VoteCreateManyVoterInput[]
+  export type DebateCreateManyCreatorInputEnvelope = {
+    data: DebateCreateManyCreatorInput | DebateCreateManyCreatorInput[]
     skipDuplicates?: boolean
   }
 
@@ -11043,6 +11377,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     debate: DebateCreateNestedOneWithoutCommentsInput
+    votes?: VoteCreateNestedManyWithoutMessageInput
   }
 
   export type CommentUncheckedCreateWithoutUserInput = {
@@ -11052,6 +11387,7 @@ export namespace Prisma {
     parentId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    votes?: VoteUncheckedCreateNestedManyWithoutMessageInput
   }
 
   export type CommentCreateOrConnectWithoutUserInput = {
@@ -11093,31 +11429,35 @@ export namespace Prisma {
     hasRequestedResults?: BoolFilter<"DebateParticipant"> | boolean
   }
 
-  export type VoteUpsertWithWhereUniqueWithoutVoterInput = {
-    where: VoteWhereUniqueInput
-    update: XOR<VoteUpdateWithoutVoterInput, VoteUncheckedUpdateWithoutVoterInput>
-    create: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput>
+  export type DebateUpsertWithWhereUniqueWithoutCreatorInput = {
+    where: DebateWhereUniqueInput
+    update: XOR<DebateUpdateWithoutCreatorInput, DebateUncheckedUpdateWithoutCreatorInput>
+    create: XOR<DebateCreateWithoutCreatorInput, DebateUncheckedCreateWithoutCreatorInput>
   }
 
-  export type VoteUpdateWithWhereUniqueWithoutVoterInput = {
-    where: VoteWhereUniqueInput
-    data: XOR<VoteUpdateWithoutVoterInput, VoteUncheckedUpdateWithoutVoterInput>
+  export type DebateUpdateWithWhereUniqueWithoutCreatorInput = {
+    where: DebateWhereUniqueInput
+    data: XOR<DebateUpdateWithoutCreatorInput, DebateUncheckedUpdateWithoutCreatorInput>
   }
 
-  export type VoteUpdateManyWithWhereWithoutVoterInput = {
-    where: VoteScalarWhereInput
-    data: XOR<VoteUpdateManyMutationInput, VoteUncheckedUpdateManyWithoutVoterInput>
+  export type DebateUpdateManyWithWhereWithoutCreatorInput = {
+    where: DebateScalarWhereInput
+    data: XOR<DebateUpdateManyMutationInput, DebateUncheckedUpdateManyWithoutCreatorInput>
   }
 
-  export type VoteScalarWhereInput = {
-    AND?: VoteScalarWhereInput | VoteScalarWhereInput[]
-    OR?: VoteScalarWhereInput[]
-    NOT?: VoteScalarWhereInput | VoteScalarWhereInput[]
-    id?: IntFilter<"Vote"> | number
-    voterId?: IntFilter<"Vote"> | number
-    participantId?: IntFilter<"Vote"> | number
-    value?: IntFilter<"Vote"> | number
-    createdAt?: DateTimeFilter<"Vote"> | Date | string
+  export type DebateScalarWhereInput = {
+    AND?: DebateScalarWhereInput | DebateScalarWhereInput[]
+    OR?: DebateScalarWhereInput[]
+    NOT?: DebateScalarWhereInput | DebateScalarWhereInput[]
+    id?: IntFilter<"Debate"> | number
+    topic?: StringFilter<"Debate"> | string
+    description?: StringNullableFilter<"Debate"> | string | null
+    status?: EnumDebateStatusFilter<"Debate"> | $Enums.DebateStatus
+    categoryId?: IntNullableFilter<"Debate"> | number | null
+    creatorId?: IntFilter<"Debate"> | number
+    results?: JsonNullableFilter<"Debate">
+    createdAt?: DateTimeFilter<"Debate"> | Date | string
+    updatedAt?: DateTimeFilter<"Debate"> | Date | string
   }
 
   export type CommentUpsertWithWhereUniqueWithoutUserInput = {
@@ -11169,13 +11509,54 @@ export namespace Prisma {
     create: XOR<CategoryCreateWithoutDebatesInput, CategoryUncheckedCreateWithoutDebatesInput>
   }
 
+  export type UserCreateWithoutDebatesInput = {
+    email?: string | null
+    name?: string | null
+    password?: string | null
+    provider?: $Enums.AuthProvider | null
+    providerId?: string | null
+    bio?: string | null
+    avatar?: string | null
+    isVerified?: boolean
+    resetToken?: string | null
+    resetTokenExpiry?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    debatesAsDebater?: DebateParticipantCreateNestedManyWithoutUserInput
+    comments?: CommentCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDebatesInput = {
+    id?: number
+    email?: string | null
+    name?: string | null
+    password?: string | null
+    provider?: $Enums.AuthProvider | null
+    providerId?: string | null
+    bio?: string | null
+    avatar?: string | null
+    isVerified?: boolean
+    resetToken?: string | null
+    resetTokenExpiry?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    debatesAsDebater?: DebateParticipantUncheckedCreateNestedManyWithoutUserInput
+    comments?: CommentUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDebatesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDebatesInput, UserUncheckedCreateWithoutDebatesInput>
+  }
+
   export type DebateParticipantCreateWithoutDebateInput = {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
     hasRequestedResults?: boolean
     user: UserCreateNestedOneWithoutDebatesAsDebaterInput
-    votes?: VoteCreateNestedManyWithoutParticipantInput
+    votesReceived?: VoteCreateNestedManyWithoutParticipantInput
+    votesGiven?: VoteCreateNestedManyWithoutVoterInput
   }
 
   export type DebateParticipantUncheckedCreateWithoutDebateInput = {
@@ -11185,7 +11566,8 @@ export namespace Prisma {
     position?: string | null
     joinedAt?: Date | string
     hasRequestedResults?: boolean
-    votes?: VoteUncheckedCreateNestedManyWithoutParticipantInput
+    votesReceived?: VoteUncheckedCreateNestedManyWithoutParticipantInput
+    votesGiven?: VoteUncheckedCreateNestedManyWithoutVoterInput
   }
 
   export type DebateParticipantCreateOrConnectWithoutDebateInput = {
@@ -11204,6 +11586,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutCommentsInput
+    votes?: VoteCreateNestedManyWithoutMessageInput
   }
 
   export type CommentUncheckedCreateWithoutDebateInput = {
@@ -11213,6 +11596,7 @@ export namespace Prisma {
     parentId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    votes?: VoteUncheckedCreateNestedManyWithoutMessageInput
   }
 
   export type CommentCreateOrConnectWithoutDebateInput = {
@@ -11249,6 +11633,52 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUpsertWithoutDebatesInput = {
+    update: XOR<UserUpdateWithoutDebatesInput, UserUncheckedUpdateWithoutDebatesInput>
+    create: XOR<UserCreateWithoutDebatesInput, UserUncheckedCreateWithoutDebatesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDebatesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDebatesInput, UserUncheckedUpdateWithoutDebatesInput>
+  }
+
+  export type UserUpdateWithoutDebatesInput = {
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: NullableEnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider | null
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    resetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    resetTokenExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    debatesAsDebater?: DebateParticipantUpdateManyWithoutUserNestedInput
+    comments?: CommentUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDebatesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: NullableEnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider | null
+    providerId?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    resetToken?: NullableStringFieldUpdateOperationsInput | string | null
+    resetTokenExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    debatesAsDebater?: DebateParticipantUncheckedUpdateManyWithoutUserNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type DebateParticipantUpsertWithWhereUniqueWithoutDebateInput = {
@@ -11296,7 +11726,7 @@ export namespace Prisma {
     resetTokenExpiry?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    votes?: VoteCreateNestedManyWithoutVoterInput
+    debates?: DebateCreateNestedManyWithoutCreatorInput
     comments?: CommentCreateNestedManyWithoutUserInput
   }
 
@@ -11314,7 +11744,7 @@ export namespace Prisma {
     resetTokenExpiry?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    votes?: VoteUncheckedCreateNestedManyWithoutVoterInput
+    debates?: DebateUncheckedCreateNestedManyWithoutCreatorInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -11331,6 +11761,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutDebatesInput
+    creator: UserCreateNestedOneWithoutDebatesInput
     comments?: CommentCreateNestedManyWithoutDebateInput
   }
 
@@ -11340,6 +11771,7 @@ export namespace Prisma {
     description?: string | null
     status?: $Enums.DebateStatus
     categoryId?: number | null
+    creatorId: number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -11354,12 +11786,14 @@ export namespace Prisma {
   export type VoteCreateWithoutParticipantInput = {
     value: number
     createdAt?: Date | string
-    voter: UserCreateNestedOneWithoutVotesInput
+    voter: DebateParticipantCreateNestedOneWithoutVotesGivenInput
+    message: CommentCreateNestedOneWithoutVotesInput
   }
 
   export type VoteUncheckedCreateWithoutParticipantInput = {
     id?: number
     voterId: number
+    messageId: number
     value: number
     createdAt?: Date | string
   }
@@ -11371,6 +11805,31 @@ export namespace Prisma {
 
   export type VoteCreateManyParticipantInputEnvelope = {
     data: VoteCreateManyParticipantInput | VoteCreateManyParticipantInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type VoteCreateWithoutVoterInput = {
+    value: number
+    createdAt?: Date | string
+    participant: DebateParticipantCreateNestedOneWithoutVotesReceivedInput
+    message: CommentCreateNestedOneWithoutVotesInput
+  }
+
+  export type VoteUncheckedCreateWithoutVoterInput = {
+    id?: number
+    participantId: number
+    messageId: number
+    value: number
+    createdAt?: Date | string
+  }
+
+  export type VoteCreateOrConnectWithoutVoterInput = {
+    where: VoteWhereUniqueInput
+    create: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput>
+  }
+
+  export type VoteCreateManyVoterInputEnvelope = {
+    data: VoteCreateManyVoterInput | VoteCreateManyVoterInput[]
     skipDuplicates?: boolean
   }
 
@@ -11398,7 +11857,7 @@ export namespace Prisma {
     resetTokenExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    votes?: VoteUpdateManyWithoutVoterNestedInput
+    debates?: DebateUpdateManyWithoutCreatorNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
   }
 
@@ -11416,7 +11875,7 @@ export namespace Prisma {
     resetTokenExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    votes?: VoteUncheckedUpdateManyWithoutVoterNestedInput
+    debates?: DebateUncheckedUpdateManyWithoutCreatorNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -11439,6 +11898,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutDebatesNestedInput
+    creator?: UserUpdateOneRequiredWithoutDebatesNestedInput
     comments?: CommentUpdateManyWithoutDebateNestedInput
   }
 
@@ -11448,6 +11908,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
     categoryId?: NullableIntFieldUpdateOperationsInput | number | null
+    creatorId?: IntFieldUpdateOperationsInput | number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11470,56 +11931,45 @@ export namespace Prisma {
     data: XOR<VoteUpdateManyMutationInput, VoteUncheckedUpdateManyWithoutParticipantInput>
   }
 
-  export type UserCreateWithoutVotesInput = {
-    email?: string | null
-    name?: string | null
-    password?: string | null
-    provider?: $Enums.AuthProvider | null
-    providerId?: string | null
-    bio?: string | null
-    avatar?: string | null
-    isVerified?: boolean
-    resetToken?: string | null
-    resetTokenExpiry?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    debatesAsDebater?: DebateParticipantCreateNestedManyWithoutUserInput
-    comments?: CommentCreateNestedManyWithoutUserInput
+  export type VoteScalarWhereInput = {
+    AND?: VoteScalarWhereInput | VoteScalarWhereInput[]
+    OR?: VoteScalarWhereInput[]
+    NOT?: VoteScalarWhereInput | VoteScalarWhereInput[]
+    id?: IntFilter<"Vote"> | number
+    voterId?: IntFilter<"Vote"> | number
+    participantId?: IntFilter<"Vote"> | number
+    messageId?: IntFilter<"Vote"> | number
+    value?: IntFilter<"Vote"> | number
+    createdAt?: DateTimeFilter<"Vote"> | Date | string
   }
 
-  export type UserUncheckedCreateWithoutVotesInput = {
-    id?: number
-    email?: string | null
-    name?: string | null
-    password?: string | null
-    provider?: $Enums.AuthProvider | null
-    providerId?: string | null
-    bio?: string | null
-    avatar?: string | null
-    isVerified?: boolean
-    resetToken?: string | null
-    resetTokenExpiry?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    debatesAsDebater?: DebateParticipantUncheckedCreateNestedManyWithoutUserInput
-    comments?: CommentUncheckedCreateNestedManyWithoutUserInput
+  export type VoteUpsertWithWhereUniqueWithoutVoterInput = {
+    where: VoteWhereUniqueInput
+    update: XOR<VoteUpdateWithoutVoterInput, VoteUncheckedUpdateWithoutVoterInput>
+    create: XOR<VoteCreateWithoutVoterInput, VoteUncheckedCreateWithoutVoterInput>
   }
 
-  export type UserCreateOrConnectWithoutVotesInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutVotesInput, UserUncheckedCreateWithoutVotesInput>
+  export type VoteUpdateWithWhereUniqueWithoutVoterInput = {
+    where: VoteWhereUniqueInput
+    data: XOR<VoteUpdateWithoutVoterInput, VoteUncheckedUpdateWithoutVoterInput>
   }
 
-  export type DebateParticipantCreateWithoutVotesInput = {
+  export type VoteUpdateManyWithWhereWithoutVoterInput = {
+    where: VoteScalarWhereInput
+    data: XOR<VoteUpdateManyMutationInput, VoteUncheckedUpdateManyWithoutVoterInput>
+  }
+
+  export type DebateParticipantCreateWithoutVotesGivenInput = {
     role: $Enums.ParticipantRole
     position?: string | null
     joinedAt?: Date | string
     hasRequestedResults?: boolean
     user: UserCreateNestedOneWithoutDebatesAsDebaterInput
     debate: DebateCreateNestedOneWithoutParticipantsInput
+    votesReceived?: VoteCreateNestedManyWithoutParticipantInput
   }
 
-  export type DebateParticipantUncheckedCreateWithoutVotesInput = {
+  export type DebateParticipantUncheckedCreateWithoutVotesGivenInput = {
     id?: number
     userId: number
     debateId: number
@@ -11527,80 +11977,86 @@ export namespace Prisma {
     position?: string | null
     joinedAt?: Date | string
     hasRequestedResults?: boolean
+    votesReceived?: VoteUncheckedCreateNestedManyWithoutParticipantInput
   }
 
-  export type DebateParticipantCreateOrConnectWithoutVotesInput = {
+  export type DebateParticipantCreateOrConnectWithoutVotesGivenInput = {
     where: DebateParticipantWhereUniqueInput
-    create: XOR<DebateParticipantCreateWithoutVotesInput, DebateParticipantUncheckedCreateWithoutVotesInput>
+    create: XOR<DebateParticipantCreateWithoutVotesGivenInput, DebateParticipantUncheckedCreateWithoutVotesGivenInput>
   }
 
-  export type UserUpsertWithoutVotesInput = {
-    update: XOR<UserUpdateWithoutVotesInput, UserUncheckedUpdateWithoutVotesInput>
-    create: XOR<UserCreateWithoutVotesInput, UserUncheckedCreateWithoutVotesInput>
-    where?: UserWhereInput
+  export type DebateParticipantCreateWithoutVotesReceivedInput = {
+    role: $Enums.ParticipantRole
+    position?: string | null
+    joinedAt?: Date | string
+    hasRequestedResults?: boolean
+    user: UserCreateNestedOneWithoutDebatesAsDebaterInput
+    debate: DebateCreateNestedOneWithoutParticipantsInput
+    votesGiven?: VoteCreateNestedManyWithoutVoterInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutVotesInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutVotesInput, UserUncheckedUpdateWithoutVotesInput>
+  export type DebateParticipantUncheckedCreateWithoutVotesReceivedInput = {
+    id?: number
+    userId: number
+    debateId: number
+    role: $Enums.ParticipantRole
+    position?: string | null
+    joinedAt?: Date | string
+    hasRequestedResults?: boolean
+    votesGiven?: VoteUncheckedCreateNestedManyWithoutVoterInput
   }
 
-  export type UserUpdateWithoutVotesInput = {
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: NullableStringFieldUpdateOperationsInput | string | null
-    provider?: NullableEnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider | null
-    providerId?: NullableStringFieldUpdateOperationsInput | string | null
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    resetToken?: NullableStringFieldUpdateOperationsInput | string | null
-    resetTokenExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    debatesAsDebater?: DebateParticipantUpdateManyWithoutUserNestedInput
-    comments?: CommentUpdateManyWithoutUserNestedInput
+  export type DebateParticipantCreateOrConnectWithoutVotesReceivedInput = {
+    where: DebateParticipantWhereUniqueInput
+    create: XOR<DebateParticipantCreateWithoutVotesReceivedInput, DebateParticipantUncheckedCreateWithoutVotesReceivedInput>
   }
 
-  export type UserUncheckedUpdateWithoutVotesInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: NullableStringFieldUpdateOperationsInput | string | null
-    provider?: NullableEnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider | null
-    providerId?: NullableStringFieldUpdateOperationsInput | string | null
-    bio?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isVerified?: BoolFieldUpdateOperationsInput | boolean
-    resetToken?: NullableStringFieldUpdateOperationsInput | string | null
-    resetTokenExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    debatesAsDebater?: DebateParticipantUncheckedUpdateManyWithoutUserNestedInput
-    comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
+  export type CommentCreateWithoutVotesInput = {
+    content: string
+    parentId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutCommentsInput
+    debate: DebateCreateNestedOneWithoutCommentsInput
   }
 
-  export type DebateParticipantUpsertWithoutVotesInput = {
-    update: XOR<DebateParticipantUpdateWithoutVotesInput, DebateParticipantUncheckedUpdateWithoutVotesInput>
-    create: XOR<DebateParticipantCreateWithoutVotesInput, DebateParticipantUncheckedCreateWithoutVotesInput>
+  export type CommentUncheckedCreateWithoutVotesInput = {
+    id?: number
+    content: string
+    userId: number
+    debateId: number
+    parentId?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CommentCreateOrConnectWithoutVotesInput = {
+    where: CommentWhereUniqueInput
+    create: XOR<CommentCreateWithoutVotesInput, CommentUncheckedCreateWithoutVotesInput>
+  }
+
+  export type DebateParticipantUpsertWithoutVotesGivenInput = {
+    update: XOR<DebateParticipantUpdateWithoutVotesGivenInput, DebateParticipantUncheckedUpdateWithoutVotesGivenInput>
+    create: XOR<DebateParticipantCreateWithoutVotesGivenInput, DebateParticipantUncheckedCreateWithoutVotesGivenInput>
     where?: DebateParticipantWhereInput
   }
 
-  export type DebateParticipantUpdateToOneWithWhereWithoutVotesInput = {
+  export type DebateParticipantUpdateToOneWithWhereWithoutVotesGivenInput = {
     where?: DebateParticipantWhereInput
-    data: XOR<DebateParticipantUpdateWithoutVotesInput, DebateParticipantUncheckedUpdateWithoutVotesInput>
+    data: XOR<DebateParticipantUpdateWithoutVotesGivenInput, DebateParticipantUncheckedUpdateWithoutVotesGivenInput>
   }
 
-  export type DebateParticipantUpdateWithoutVotesInput = {
+  export type DebateParticipantUpdateWithoutVotesGivenInput = {
     role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
     user?: UserUpdateOneRequiredWithoutDebatesAsDebaterNestedInput
     debate?: DebateUpdateOneRequiredWithoutParticipantsNestedInput
+    votesReceived?: VoteUpdateManyWithoutParticipantNestedInput
   }
 
-  export type DebateParticipantUncheckedUpdateWithoutVotesInput = {
+  export type DebateParticipantUncheckedUpdateWithoutVotesGivenInput = {
     id?: IntFieldUpdateOperationsInput | number
     userId?: IntFieldUpdateOperationsInput | number
     debateId?: IntFieldUpdateOperationsInput | number
@@ -11608,6 +12064,69 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
+    votesReceived?: VoteUncheckedUpdateManyWithoutParticipantNestedInput
+  }
+
+  export type DebateParticipantUpsertWithoutVotesReceivedInput = {
+    update: XOR<DebateParticipantUpdateWithoutVotesReceivedInput, DebateParticipantUncheckedUpdateWithoutVotesReceivedInput>
+    create: XOR<DebateParticipantCreateWithoutVotesReceivedInput, DebateParticipantUncheckedCreateWithoutVotesReceivedInput>
+    where?: DebateParticipantWhereInput
+  }
+
+  export type DebateParticipantUpdateToOneWithWhereWithoutVotesReceivedInput = {
+    where?: DebateParticipantWhereInput
+    data: XOR<DebateParticipantUpdateWithoutVotesReceivedInput, DebateParticipantUncheckedUpdateWithoutVotesReceivedInput>
+  }
+
+  export type DebateParticipantUpdateWithoutVotesReceivedInput = {
+    role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
+    position?: NullableStringFieldUpdateOperationsInput | string | null
+    joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
+    user?: UserUpdateOneRequiredWithoutDebatesAsDebaterNestedInput
+    debate?: DebateUpdateOneRequiredWithoutParticipantsNestedInput
+    votesGiven?: VoteUpdateManyWithoutVoterNestedInput
+  }
+
+  export type DebateParticipantUncheckedUpdateWithoutVotesReceivedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    debateId?: IntFieldUpdateOperationsInput | number
+    role?: EnumParticipantRoleFieldUpdateOperationsInput | $Enums.ParticipantRole
+    position?: NullableStringFieldUpdateOperationsInput | string | null
+    joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
+    votesGiven?: VoteUncheckedUpdateManyWithoutVoterNestedInput
+  }
+
+  export type CommentUpsertWithoutVotesInput = {
+    update: XOR<CommentUpdateWithoutVotesInput, CommentUncheckedUpdateWithoutVotesInput>
+    create: XOR<CommentCreateWithoutVotesInput, CommentUncheckedCreateWithoutVotesInput>
+    where?: CommentWhereInput
+  }
+
+  export type CommentUpdateToOneWithWhereWithoutVotesInput = {
+    where?: CommentWhereInput
+    data: XOR<CommentUpdateWithoutVotesInput, CommentUncheckedUpdateWithoutVotesInput>
+  }
+
+  export type CommentUpdateWithoutVotesInput = {
+    content?: StringFieldUpdateOperationsInput | string
+    parentId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutCommentsNestedInput
+    debate?: DebateUpdateOneRequiredWithoutCommentsNestedInput
+  }
+
+  export type CommentUncheckedUpdateWithoutVotesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    content?: StringFieldUpdateOperationsInput | string
+    userId?: IntFieldUpdateOperationsInput | number
+    debateId?: IntFieldUpdateOperationsInput | number
+    parentId?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserCreateWithoutCommentsInput = {
@@ -11624,7 +12143,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     debatesAsDebater?: DebateParticipantCreateNestedManyWithoutUserInput
-    votes?: VoteCreateNestedManyWithoutVoterInput
+    debates?: DebateCreateNestedManyWithoutCreatorInput
   }
 
   export type UserUncheckedCreateWithoutCommentsInput = {
@@ -11642,7 +12161,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     debatesAsDebater?: DebateParticipantUncheckedCreateNestedManyWithoutUserInput
-    votes?: VoteUncheckedCreateNestedManyWithoutVoterInput
+    debates?: DebateUncheckedCreateNestedManyWithoutCreatorInput
   }
 
   export type UserCreateOrConnectWithoutCommentsInput = {
@@ -11658,6 +12177,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutDebatesInput
+    creator: UserCreateNestedOneWithoutDebatesInput
     participants?: DebateParticipantCreateNestedManyWithoutDebateInput
   }
 
@@ -11667,6 +12187,7 @@ export namespace Prisma {
     description?: string | null
     status?: $Enums.DebateStatus
     categoryId?: number | null
+    creatorId: number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -11676,6 +12197,31 @@ export namespace Prisma {
   export type DebateCreateOrConnectWithoutCommentsInput = {
     where: DebateWhereUniqueInput
     create: XOR<DebateCreateWithoutCommentsInput, DebateUncheckedCreateWithoutCommentsInput>
+  }
+
+  export type VoteCreateWithoutMessageInput = {
+    value: number
+    createdAt?: Date | string
+    voter: DebateParticipantCreateNestedOneWithoutVotesGivenInput
+    participant: DebateParticipantCreateNestedOneWithoutVotesReceivedInput
+  }
+
+  export type VoteUncheckedCreateWithoutMessageInput = {
+    id?: number
+    voterId: number
+    participantId: number
+    value: number
+    createdAt?: Date | string
+  }
+
+  export type VoteCreateOrConnectWithoutMessageInput = {
+    where: VoteWhereUniqueInput
+    create: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput>
+  }
+
+  export type VoteCreateManyMessageInputEnvelope = {
+    data: VoteCreateManyMessageInput | VoteCreateManyMessageInput[]
+    skipDuplicates?: boolean
   }
 
   export type UserUpsertWithoutCommentsInput = {
@@ -11703,7 +12249,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     debatesAsDebater?: DebateParticipantUpdateManyWithoutUserNestedInput
-    votes?: VoteUpdateManyWithoutVoterNestedInput
+    debates?: DebateUpdateManyWithoutCreatorNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCommentsInput = {
@@ -11721,7 +12267,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     debatesAsDebater?: DebateParticipantUncheckedUpdateManyWithoutUserNestedInput
-    votes?: VoteUncheckedUpdateManyWithoutVoterNestedInput
+    debates?: DebateUncheckedUpdateManyWithoutCreatorNestedInput
   }
 
   export type DebateUpsertWithoutCommentsInput = {
@@ -11743,6 +12289,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutDebatesNestedInput
+    creator?: UserUpdateOneRequiredWithoutDebatesNestedInput
     participants?: DebateParticipantUpdateManyWithoutDebateNestedInput
   }
 
@@ -11752,10 +12299,27 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
     categoryId?: NullableIntFieldUpdateOperationsInput | number | null
+    creatorId?: IntFieldUpdateOperationsInput | number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: DebateParticipantUncheckedUpdateManyWithoutDebateNestedInput
+  }
+
+  export type VoteUpsertWithWhereUniqueWithoutMessageInput = {
+    where: VoteWhereUniqueInput
+    update: XOR<VoteUpdateWithoutMessageInput, VoteUncheckedUpdateWithoutMessageInput>
+    create: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput>
+  }
+
+  export type VoteUpdateWithWhereUniqueWithoutMessageInput = {
+    where: VoteWhereUniqueInput
+    data: XOR<VoteUpdateWithoutMessageInput, VoteUncheckedUpdateWithoutMessageInput>
+  }
+
+  export type VoteUpdateManyWithWhereWithoutMessageInput = {
+    where: VoteScalarWhereInput
+    data: XOR<VoteUpdateManyMutationInput, VoteUncheckedUpdateManyWithoutMessageInput>
   }
 
   export type DebateCreateWithoutCategoryInput = {
@@ -11765,6 +12329,7 @@ export namespace Prisma {
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    creator: UserCreateNestedOneWithoutDebatesInput
     participants?: DebateParticipantCreateNestedManyWithoutDebateInput
     comments?: CommentCreateNestedManyWithoutDebateInput
   }
@@ -11774,6 +12339,7 @@ export namespace Prisma {
     topic: string
     description?: string | null
     status?: $Enums.DebateStatus
+    creatorId: number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -11807,20 +12373,6 @@ export namespace Prisma {
     data: XOR<DebateUpdateManyMutationInput, DebateUncheckedUpdateManyWithoutCategoryInput>
   }
 
-  export type DebateScalarWhereInput = {
-    AND?: DebateScalarWhereInput | DebateScalarWhereInput[]
-    OR?: DebateScalarWhereInput[]
-    NOT?: DebateScalarWhereInput | DebateScalarWhereInput[]
-    id?: IntFilter<"Debate"> | number
-    topic?: StringFilter<"Debate"> | string
-    description?: StringNullableFilter<"Debate"> | string | null
-    status?: EnumDebateStatusFilter<"Debate"> | $Enums.DebateStatus
-    categoryId?: IntNullableFilter<"Debate"> | number | null
-    results?: JsonNullableFilter<"Debate">
-    createdAt?: DateTimeFilter<"Debate"> | Date | string
-    updatedAt?: DateTimeFilter<"Debate"> | Date | string
-  }
-
   export type DebateParticipantCreateManyUserInput = {
     id?: number
     debateId: number
@@ -11830,11 +12382,15 @@ export namespace Prisma {
     hasRequestedResults?: boolean
   }
 
-  export type VoteCreateManyVoterInput = {
+  export type DebateCreateManyCreatorInput = {
     id?: number
-    participantId: number
-    value: number
+    topic: string
+    description?: string | null
+    status?: $Enums.DebateStatus
+    categoryId?: number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type CommentCreateManyUserInput = {
@@ -11852,7 +12408,8 @@ export namespace Prisma {
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
     debate?: DebateUpdateOneRequiredWithoutParticipantsNestedInput
-    votes?: VoteUpdateManyWithoutParticipantNestedInput
+    votesReceived?: VoteUpdateManyWithoutParticipantNestedInput
+    votesGiven?: VoteUpdateManyWithoutVoterNestedInput
   }
 
   export type DebateParticipantUncheckedUpdateWithoutUserInput = {
@@ -11862,7 +12419,8 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
-    votes?: VoteUncheckedUpdateManyWithoutParticipantNestedInput
+    votesReceived?: VoteUncheckedUpdateManyWithoutParticipantNestedInput
+    votesGiven?: VoteUncheckedUpdateManyWithoutVoterNestedInput
   }
 
   export type DebateParticipantUncheckedUpdateManyWithoutUserInput = {
@@ -11874,24 +12432,40 @@ export namespace Prisma {
     hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
   }
 
-  export type VoteUpdateWithoutVoterInput = {
-    value?: IntFieldUpdateOperationsInput | number
+  export type DebateUpdateWithoutCreatorInput = {
+    topic?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    participant?: DebateParticipantUpdateOneRequiredWithoutVotesNestedInput
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    category?: CategoryUpdateOneWithoutDebatesNestedInput
+    participants?: DebateParticipantUpdateManyWithoutDebateNestedInput
+    comments?: CommentUpdateManyWithoutDebateNestedInput
   }
 
-  export type VoteUncheckedUpdateWithoutVoterInput = {
+  export type DebateUncheckedUpdateWithoutCreatorInput = {
     id?: IntFieldUpdateOperationsInput | number
-    participantId?: IntFieldUpdateOperationsInput | number
-    value?: IntFieldUpdateOperationsInput | number
+    topic?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    participants?: DebateParticipantUncheckedUpdateManyWithoutDebateNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutDebateNestedInput
   }
 
-  export type VoteUncheckedUpdateManyWithoutVoterInput = {
+  export type DebateUncheckedUpdateManyWithoutCreatorInput = {
     id?: IntFieldUpdateOperationsInput | number
-    participantId?: IntFieldUpdateOperationsInput | number
-    value?: IntFieldUpdateOperationsInput | number
+    topic?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
+    results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CommentUpdateWithoutUserInput = {
@@ -11900,6 +12474,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     debate?: DebateUpdateOneRequiredWithoutCommentsNestedInput
+    votes?: VoteUpdateManyWithoutMessageNestedInput
   }
 
   export type CommentUncheckedUpdateWithoutUserInput = {
@@ -11909,6 +12484,7 @@ export namespace Prisma {
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    votes?: VoteUncheckedUpdateManyWithoutMessageNestedInput
   }
 
   export type CommentUncheckedUpdateManyWithoutUserInput = {
@@ -11944,7 +12520,8 @@ export namespace Prisma {
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
     user?: UserUpdateOneRequiredWithoutDebatesAsDebaterNestedInput
-    votes?: VoteUpdateManyWithoutParticipantNestedInput
+    votesReceived?: VoteUpdateManyWithoutParticipantNestedInput
+    votesGiven?: VoteUpdateManyWithoutVoterNestedInput
   }
 
   export type DebateParticipantUncheckedUpdateWithoutDebateInput = {
@@ -11954,7 +12531,8 @@ export namespace Prisma {
     position?: NullableStringFieldUpdateOperationsInput | string | null
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     hasRequestedResults?: BoolFieldUpdateOperationsInput | boolean
-    votes?: VoteUncheckedUpdateManyWithoutParticipantNestedInput
+    votesReceived?: VoteUncheckedUpdateManyWithoutParticipantNestedInput
+    votesGiven?: VoteUncheckedUpdateManyWithoutVoterNestedInput
   }
 
   export type DebateParticipantUncheckedUpdateManyWithoutDebateInput = {
@@ -11972,6 +12550,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutCommentsNestedInput
+    votes?: VoteUpdateManyWithoutMessageNestedInput
   }
 
   export type CommentUncheckedUpdateWithoutDebateInput = {
@@ -11981,6 +12560,7 @@ export namespace Prisma {
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    votes?: VoteUncheckedUpdateManyWithoutMessageNestedInput
   }
 
   export type CommentUncheckedUpdateManyWithoutDebateInput = {
@@ -11995,6 +12575,15 @@ export namespace Prisma {
   export type VoteCreateManyParticipantInput = {
     id?: number
     voterId: number
+    messageId: number
+    value: number
+    createdAt?: Date | string
+  }
+
+  export type VoteCreateManyVoterInput = {
+    id?: number
+    participantId: number
+    messageId: number
     value: number
     createdAt?: Date | string
   }
@@ -12002,12 +12591,14 @@ export namespace Prisma {
   export type VoteUpdateWithoutParticipantInput = {
     value?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    voter?: UserUpdateOneRequiredWithoutVotesNestedInput
+    voter?: DebateParticipantUpdateOneRequiredWithoutVotesGivenNestedInput
+    message?: CommentUpdateOneRequiredWithoutVotesNestedInput
   }
 
   export type VoteUncheckedUpdateWithoutParticipantInput = {
     id?: IntFieldUpdateOperationsInput | number
     voterId?: IntFieldUpdateOperationsInput | number
+    messageId?: IntFieldUpdateOperationsInput | number
     value?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -12015,6 +12606,61 @@ export namespace Prisma {
   export type VoteUncheckedUpdateManyWithoutParticipantInput = {
     id?: IntFieldUpdateOperationsInput | number
     voterId?: IntFieldUpdateOperationsInput | number
+    messageId?: IntFieldUpdateOperationsInput | number
+    value?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VoteUpdateWithoutVoterInput = {
+    value?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    participant?: DebateParticipantUpdateOneRequiredWithoutVotesReceivedNestedInput
+    message?: CommentUpdateOneRequiredWithoutVotesNestedInput
+  }
+
+  export type VoteUncheckedUpdateWithoutVoterInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    participantId?: IntFieldUpdateOperationsInput | number
+    messageId?: IntFieldUpdateOperationsInput | number
+    value?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VoteUncheckedUpdateManyWithoutVoterInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    participantId?: IntFieldUpdateOperationsInput | number
+    messageId?: IntFieldUpdateOperationsInput | number
+    value?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VoteCreateManyMessageInput = {
+    id?: number
+    voterId: number
+    participantId: number
+    value: number
+    createdAt?: Date | string
+  }
+
+  export type VoteUpdateWithoutMessageInput = {
+    value?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    voter?: DebateParticipantUpdateOneRequiredWithoutVotesGivenNestedInput
+    participant?: DebateParticipantUpdateOneRequiredWithoutVotesReceivedNestedInput
+  }
+
+  export type VoteUncheckedUpdateWithoutMessageInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    voterId?: IntFieldUpdateOperationsInput | number
+    participantId?: IntFieldUpdateOperationsInput | number
+    value?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VoteUncheckedUpdateManyWithoutMessageInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    voterId?: IntFieldUpdateOperationsInput | number
+    participantId?: IntFieldUpdateOperationsInput | number
     value?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -12024,6 +12670,7 @@ export namespace Prisma {
     topic: string
     description?: string | null
     status?: $Enums.DebateStatus
+    creatorId: number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12036,6 +12683,7 @@ export namespace Prisma {
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    creator?: UserUpdateOneRequiredWithoutDebatesNestedInput
     participants?: DebateParticipantUpdateManyWithoutDebateNestedInput
     comments?: CommentUpdateManyWithoutDebateNestedInput
   }
@@ -12045,6 +12693,7 @@ export namespace Prisma {
     topic?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    creatorId?: IntFieldUpdateOperationsInput | number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12057,6 +12706,7 @@ export namespace Prisma {
     topic?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumDebateStatusFieldUpdateOperationsInput | $Enums.DebateStatus
+    creatorId?: IntFieldUpdateOperationsInput | number
     results?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

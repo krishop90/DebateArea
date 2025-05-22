@@ -142,6 +142,7 @@ exports.Prisma.DebateScalarFieldEnum = {
   description: 'description',
   status: 'status',
   categoryId: 'categoryId',
+  creatorId: 'creatorId',
   results: 'results',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -161,6 +162,7 @@ exports.Prisma.VoteScalarFieldEnum = {
   id: 'id',
   voterId: 'voterId',
   participantId: 'participantId',
+  messageId: 'messageId',
   value: 'value',
   createdAt: 'createdAt'
 };

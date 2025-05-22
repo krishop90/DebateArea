@@ -72,7 +72,7 @@ export default function DebatePage() {
           if (p.id === participantId) {
             return {
               ...p,
-              votes: [...p.votes, vote]
+              votesReceived: [...(p.votesReceived || []), vote]
             }
           }
           return p
@@ -89,9 +89,23 @@ export default function DebatePage() {
       });
 
       if (allDebatersRequested) {
-        toast.success('Both debaters have requested results. Ending debate...');
+        toast.success('Both debaters have requested results. Calculating final results...');
       } else {
         toast.info(`${participant.user.name} has requested results`);
+      }
+    });
+
+    socket.on('debateEnded', ({ debateId, debate, results }) => {
+      if (debateId === parseInt(id)) {
+        setDebate(prev => ({
+          ...prev,
+          status: 'FINISHED',
+          results: results
+        }));
+        clearInterval(timerRef.current);
+        setTimeLeft(null);
+        setTimerProgress(100);
+        toast.success('Debate has ended. Results are now available.');
       }
     });
 
@@ -100,15 +114,6 @@ export default function DebatePage() {
         if (debateId === parseInt(id)) {
           const endTime = new Date(startTime).getTime() + (duration * 60 * 1000);
           startTimer(endTime);
-        }
-      });
-
-      socket.on('debateEnded', ({ debateId, debate }) => {
-        if (debateId === parseInt(id)) {
-          setDebate(debate);
-          clearInterval(timerRef.current);
-          setTimeLeft(null);
-          setTimerProgress(100);
         }
       });
     }
@@ -121,6 +126,8 @@ export default function DebatePage() {
       socket.off('newMessage')
       socket.off('voteUpdated')
       socket.off('resultRequested')
+      socket.off('debateEnded')
+      socket.off('debateStarted')
     }
   }, [id, socket])
 
@@ -185,24 +192,51 @@ export default function DebatePage() {
   }
 
   const getVoteCounts = (participant) => {
-    const upvotes = participant.votes.filter(v => v.value === 1).length
-    const downvotes = participant.votes.filter(v => v.value === -1).length
-    return { upvotes, downvotes }
+    if (!participant || !participant.votesReceived) {
+      return { upvotes: 0, downvotes: 0 };
+    }
+    const upvotes = participant.votesReceived.filter(v => v.value === 1).length;
+    const downvotes = participant.votesReceived.filter(v => v.value === -1).length;
+    return { upvotes, downvotes };
+  }
+
+  const getDebaterStats = (debate) => {
+    if (!debate || !debate.participants) return [];
+    
+    return debate.participants
+      .filter(p => p.role === 'DEBATER')
+      .map(debater => {
+        const { upvotes, downvotes } = getVoteCounts(debater);
+        const messages = debate.comments?.filter(c => c.userId === debater.userId).length || 0;
+        const totalVotes = upvotes - downvotes;
+        
+        return {
+          id: debater.id,
+          userId: debater.userId,
+          name: debater.user?.name || 'Anonymous',
+          avatar: debater.user?.avatar,
+          upvotes,
+          downvotes,
+          totalVotes,
+          messages,
+          winRate: debate.results?.winnerId === debater.userId ? 100 : 0
+        };
+      });
   }
 
   const getUserVote = (participant) => {
-    if (!currentParticipant) return null;
-    const vote = participant.votes.find(v => v.voterId === currentParticipant.id);
+    if (!currentParticipant || !participant?.votesReceived) return null;
+    const vote = participant.votesReceived.find(v => v.voterId === currentParticipant.id);
     return vote ? vote.value : null;
   }
 
-  const handleVote = async (participantId, value) => {
+  const handleVote = async (participantId, value, messageId) => {
     try {
       // Convert string vote to integer
       const voteValue = value === 'up' ? 1 : -1;
-      await debates.vote(id, { participantId, vote: voteValue });
+      await debates.vote(id, { participantId, vote: voteValue, messageId });
     } catch (error) {
-      toast.error('Failed to vote');
+      toast.error(error.response?.data?.message || 'Failed to vote');
     }
   }
 
@@ -356,14 +390,15 @@ export default function DebatePage() {
                             <div className="flex gap-2">
                               {(() => {
                                 const participant = debate.participants.find(p => p.userId === msg.userId);
+                                if (!participant) return null;
                                 const { upvotes, downvotes } = getVoteCounts(participant);
-                                const userVote = getUserVote(participant);
+                                const userVote = participant.votesReceived?.find(v => v.voterId === currentParticipant?.id && v.messageId === msg.id)?.value;
                                 return (
                                   <>
                                     <Button
                                       variant={userVote === 1 ? "default" : "ghost"}
                                       size="sm"
-                                      onClick={() => handleVote(participant.id, 'up')}
+                                      onClick={() => handleVote(participant.id, 'up', msg.id)}
                                     >
                                       <ThumbsUp className="h-4 w-4" />
                                       <span className="ml-1">{upvotes}</span>
@@ -371,7 +406,7 @@ export default function DebatePage() {
                                     <Button
                                       variant={userVote === -1 ? "default" : "ghost"}
                                       size="sm"
-                                      onClick={() => handleVote(participant.id, 'down')}
+                                      onClick={() => handleVote(participant.id, 'down', msg.id)}
                                     >
                                       <ThumbsDown className="h-4 w-4" />
                                       <span className="ml-1">{downvotes}</span>
@@ -418,126 +453,148 @@ export default function DebatePage() {
                       <div className="text-center">
                         <h3 className="text-lg font-semibold">Winner</h3>
                         <p className="text-muted-foreground">
-                          {debate.participants.find(p => p.userId === debate.results.winnerId)?.user.name}
+                          {debate.results.aiAnalysis?.winner?.name || 
+                           debate.participants.find(p => p.userId === debate.results.winnerId)?.user.name || 'No winner determined'}
                         </p>
+                        {debate.results.aiAnalysis?.winner?.justification && (
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            {debate.results.aiAnalysis.winner.justification}
+                          </p>
+                        )}
                       </div>
 
                       {/* Performance Metrics */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {debate.results.scores.map((score) => (
-                          <Card key={score.userId}>
-                            <CardHeader>
-                              <CardTitle className="text-lg">{score.name}'s Performance</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="space-y-4">
-                                {/* Vote Distribution */}
-                                <div>
-                                  <h4 className="text-sm font-medium mb-2">Vote Distribution</h4>
-                                  <div className="flex items-center gap-2">
-                                    <div className="flex-1 bg-green-100 rounded-full h-4">
-                                      <div 
-                                        className="bg-green-500 h-4 rounded-full" 
-                                        style={{ width: `${(score.upvotes / (score.upvotes + score.downvotes || 1)) * 100}%` }}
-                                      />
-                                    </div>
-                                    <span className="text-sm font-medium">{score.upvotes} upvotes</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-2">
-                                    <div className="flex-1 bg-red-100 rounded-full h-4">
-                                      <div 
-                                        className="bg-red-500 h-4 rounded-full" 
-                                        style={{ width: `${(score.downvotes / (score.upvotes + score.downvotes || 1)) * 100}%` }}
-                                      />
-                                    </div>
-                                    <span className="text-sm font-medium">{score.downvotes} downvotes</span>
-                                  </div>
-                                </div>
-
-                                {/* Message Count */}
-                                <div>
-                                  <h4 className="text-sm font-medium mb-2">Message Activity</h4>
-                                  <div className="flex items-center gap-2">
-                                    <div className="flex-1 bg-blue-100 rounded-full h-4">
-                                      <div 
-                                        className="bg-blue-500 h-4 rounded-full" 
-                                        style={{ width: `${(score.messages / 20) * 100}%` }}
-                                      />
-                                    </div>
-                                    <span className="text-sm font-medium">{score.messages} messages</span>
-                                  </div>
-                                </div>
-
-                                {/* Performance Metrics */}
-                                {debate.results.aiAnalysis && (
+                        {(debate.results.aiAnalysis?.debaterAnalysis || getDebaterStats(debate)).map((analysis) => {
+                          const stats = getDebaterStats(debate).find(s => s.userId === analysis.userId);
+                          return (
+                            <Card key={analysis.userId}>
+                              <CardHeader>
+                                <CardTitle className="text-lg">{analysis.name}'s Performance</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-4">
+                                  {/* Core Metrics */}
                                   <div>
-                                    <h4 className="text-sm font-medium mb-2">Performance Metrics</h4>
+                                    <h4 className="text-sm font-medium mb-2">Core Metrics</h4>
                                     <div className="space-y-2">
-                                      {['Argument Strength', 'Evidence Usage', 'Rhetorical Skills', 'Response Quality'].map((metric) => (
-                                        <div key={metric} className="flex items-center gap-2">
-                                          <span className="text-sm w-32">{metric}</span>
-                                          <div className="flex-1 bg-gray-100 rounded-full h-2">
+                                      {[
+                                        { label: 'Argument Quality', value: analysis.metrics?.argumentStrength || 0 },
+                                        { label: 'Communication Skills', value: analysis.metrics?.rhetoricalSkills || 0 },
+                                        { label: 'Topic Coverage', value: analysis.metrics?.evidenceUsage || 0 }
+                                      ].map((metric) => (
+                                        <div key={metric.label} className="flex items-center gap-2">
+                                          <span className="text-sm w-32">{metric.label}</span>
+                                          <div className="flex-1 bg-secondary rounded-full h-2">
                                             <div 
-                                              className="bg-primary h-2 rounded-full" 
-                                              style={{ width: `${Math.floor(Math.random() * 40 + 60)}%` }}
+                                              className="bg-primary h-2 rounded-full transition-all duration-300" 
+                                              style={{ width: `${(metric.value / 10) * 100}%` }}
                                             />
                                           </div>
+                                          <span className="text-sm font-medium">{metric.value}/10</span>
                                         </div>
                                       ))}
                                     </div>
                                   </div>
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
+
+                                  {/* Vote Distribution */}
+                                  <div>
+                                    <h4 className="text-sm font-medium mb-2">Vote Distribution</h4>
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex-1 bg-green-100 rounded-full h-4">
+                                        <div 
+                                          className="bg-green-500 h-4 rounded-full" 
+                                          style={{ width: `${(stats?.upvotes || 0) / ((stats?.upvotes || 0) + (stats?.downvotes || 0) || 1) * 100}%` }}
+                                        />
+                                      </div>
+                                      <span className="text-sm font-medium">{stats?.upvotes || 0} upvotes</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-2">
+                                      <div className="flex-1 bg-red-100 rounded-full h-4">
+                                        <div 
+                                          className="bg-red-500 h-4 rounded-full" 
+                                          style={{ width: `${(stats?.downvotes || 0) / ((stats?.upvotes || 0) + (stats?.downvotes || 0) || 1) * 100}%` }}
+                                        />
+                                      </div>
+                                      <span className="text-sm font-medium">{stats?.downvotes || 0} downvotes</span>
+                                    </div>
+                                  </div>
+
+                                  {/* Strengths and Weaknesses */}
+                                  {analysis.metrics?.strengths && analysis.metrics?.weaknesses && (
+                                    <div>
+                                      <h4 className="text-sm font-medium mb-2">Analysis</h4>
+                                      <div className="space-y-2">
+                                        <div>
+                                          <h5 className="text-xs font-medium text-green-600">Strengths</h5>
+                                          <ul className="text-sm space-y-1">
+                                            {analysis.metrics.strengths.map((strength, i) => (
+                                              <li key={i} className="text-green-700">• {strength}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                        <div>
+                                          <h5 className="text-xs font-medium text-red-600">Areas for Improvement</h5>
+                                          <ul className="text-sm space-y-1">
+                                            {analysis.metrics.weaknesses.map((weakness, i) => (
+                                              <li key={i} className="text-red-700">• {weakness}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
                       </div>
 
-                      {/* AI Analysis Summary */}
-                      {debate.results.aiAnalysis && (
+                      {/* Key Arguments */}
+                      {debate.results.aiAnalysis?.keyArguments && (
                         <div className="space-y-4">
-                          <h3 className="text-lg font-semibold">AI Judge Analysis</h3>
-                          <ScrollArea className="h-[300px] rounded-md border p-4">
-                            <div className="space-y-4">
-                              {/* Overall Assessment */}
-                              <div>
-                                <h4 className="font-semibold text-md mb-2">Overall Assessment</h4>
-                                <div className="grid grid-cols-3 gap-4">
-                                  {['Debate Quality', 'Engagement Level', 'Topic Coverage'].map((metric) => (
-                                    <div key={metric} className="text-center p-3 bg-secondary rounded-lg">
-                                      <div className="text-2xl font-bold mb-1">
-                                        {Math.floor(Math.random() * 3 + 7)}/10
-                                      </div>
-                                      <div className="text-sm text-muted-foreground">{metric}</div>
-                                    </div>
-                                  ))}
-                                </div>
+                          <h3 className="text-lg font-semibold">Key Arguments</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {debate.results.aiAnalysis.keyArguments.map((argument, index) => (
+                              <div key={index} className="p-3 bg-secondary rounded-lg">
+                                <p className="text-sm">{argument}</p>
                               </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
-                              {/* Key Points */}
-                              <div>
-                                <h4 className="font-semibold text-md mb-2">Key Points</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="p-3 bg-secondary rounded-lg">
-                                    <h5 className="font-medium mb-2">Strengths</h5>
-                                    <ul className="text-sm space-y-1">
-                                      <li>• Good engagement with the topic</li>
-                                      <li>• Clear argument structure</li>
-                                      <li>• Active participation</li>
-                                    </ul>
-                                  </div>
-                                  <div className="p-3 bg-secondary rounded-lg">
-                                    <h5 className="font-medium mb-2">Areas for Improvement</h5>
-                                    <ul className="text-sm space-y-1">
-                                      <li>• More evidence needed</li>
-                                      <li>• Stronger rebuttals</li>
-                                      <li>• Better time management</li>
-                                    </ul>
-                                  </div>
+                      {/* Overall Assessment */}
+                      {debate.results.aiAnalysis?.overallAssessment && (
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Overall Assessment</h3>
+                          <div className="grid grid-cols-3 gap-4">
+                            {Object.entries(debate.results.aiAnalysis.overallAssessment).map(([key, value]) => (
+                              <div key={key} className="text-center p-3 bg-secondary rounded-lg">
+                                <div className="text-2xl font-bold mb-1">
+                                  {value}/10
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {key.replace(/([A-Z])/g, ' $1').trim()}
                                 </div>
                               </div>
-                            </div>
-                          </ScrollArea>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Areas for Improvement */}
+                      {debate.results.aiAnalysis?.improvements && (
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Areas for Improvement</h3>
+                          <div className="p-3 bg-secondary rounded-lg">
+                            <ul className="text-sm space-y-1">
+                              {debate.results.aiAnalysis.improvements.map((improvement, index) => (
+                                <li key={index}>• {improvement}</li>
+                              ))}
+                            </ul>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -574,7 +631,7 @@ export default function DebatePage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleVote(debater.id, 'up')}
+                                onClick={() => handleVote(debater.id, 'up', null)}
                               >
                                 <ThumbsUp className="h-4 w-4" />
                                 <span className="ml-1">{upvotes}</span>
@@ -582,7 +639,7 @@ export default function DebatePage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleVote(debater.id, 'down')}
+                                onClick={() => handleVote(debater.id, 'down', null)}
                               >
                                 <ThumbsDown className="h-4 w-4" />
                                 <span className="ml-1">{downvotes}</span>

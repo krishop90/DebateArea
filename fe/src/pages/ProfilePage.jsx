@@ -1,11 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { ArrowLeft, Edit, Save } from "lucide-react"
 import { useAuth } from "../lib/auth-context"
-import { auth } from "../lib/api"
-
+import { auth, debates } from "../lib/api"
 import { Button } from "../components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card"
@@ -23,11 +22,24 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState("profile")
   const [loading, setLoading] = useState(false)
+  const [debates, setDebates] = useState([])
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
     bio: user?.bio || "",
   })
+
+  useEffect(() => {
+    const fetchDebates = async () => {
+      try {
+        const response = await debates.getMyDebates()
+        setDebates(response.data.debates)
+      } catch (error) {
+        console.error('Error fetching debates:', error)
+      }
+    }
+    fetchDebates()
+  }, [])
 
   const handleInputChange = (e) => {
     const { id, value } = e.target
@@ -166,11 +178,95 @@ export default function ProfilePage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>My Debates</CardTitle>
-                    <CardDescription>Debates you've participated in</CardDescription>
+                    <CardDescription>Debates you've participated in as a debater</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-sm text-muted-foreground">
-                      Your debate history will appear here.
+                    <div className="space-y-4">
+                      {debates.length === 0 ? (
+                        <p className="text-center text-muted-foreground">No debates found</p>
+                      ) : (
+                        debates.map((debate) => {
+                          const participant = debate.participants.find(p => p.userId === user.id);
+                          const isWinner = debate.results?.winnerId === user.id;
+                          const { upvotes, downvotes } = participant ? {
+                            upvotes: participant.votesReceived?.filter(v => v.value === 1).length || 0,
+                            downvotes: participant.votesReceived?.filter(v => v.value === -1).length || 0
+                          } : { upvotes: 0, downvotes: 0 };
+
+                          return (
+                            <Card key={debate.id} className="hover:shadow-lg transition-shadow">
+                              <CardHeader>
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <CardTitle className="text-lg">{debate.topic}</CardTitle>
+                                    <CardDescription>
+                                      {new Date(debate.createdAt).toLocaleDateString()}
+                                    </CardDescription>
+                                  </div>
+                                  <div className="flex flex-col items-end gap-2">
+                                    <Badge variant={isWinner ? "success" : "destructive"}>
+                                      {isWinner ? "Won" : "Lost"}
+                                    </Badge>
+                                    <Badge variant="outline">
+                                      {debate.status}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="grid grid-cols-3 gap-4">
+                                  <div className="text-center p-3 bg-secondary rounded-lg">
+                                    <div className="text-2xl font-bold mb-1">
+                                      {upvotes - downvotes}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                      Net Votes
+                                    </div>
+                                  </div>
+                                  <div className="text-center p-3 bg-secondary rounded-lg">
+                                    <div className="text-2xl font-bold mb-1">
+                                      {upvotes}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                      Upvotes
+                                    </div>
+                                  </div>
+                                  <div className="text-center p-3 bg-secondary rounded-lg">
+                                    <div className="text-2xl font-bold mb-1">
+                                      {downvotes}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                      Downvotes
+                                    </div>
+                                  </div>
+                                </div>
+                                {debate.results?.aiAnalysis?.overallAssessment && (
+                                  <div className="mt-4">
+                                    <h4 className="text-sm font-medium mb-2">Overall Assessment</h4>
+                                    <div className="grid grid-cols-3 gap-4">
+                                      {Object.entries(debate.results.aiAnalysis.overallAssessment).map(([key, value]) => (
+                                        <div key={key} className="text-center p-3 bg-secondary rounded-lg">
+                                          <div className="text-2xl font-bold mb-1">
+                                            {value}/10
+                                          </div>
+                                          <div className="text-sm text-muted-foreground">
+                                            {key.replace(/([A-Z])/g, ' $1').trim()}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                <div className="mt-4">
+                                  <Button variant="outline" className="w-full" asChild>
+                                    <Link to={`/debate/${debate.id}`}>View Debate</Link>
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })
+                      )}
                     </div>
                   </CardContent>
                 </Card>
